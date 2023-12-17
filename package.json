@@ -1,0 +1,14 @@
+{
+  "name": "key-exchanges",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "@types/node": "^20.10.4"
+  },
+  "scripts": {
+    "start": "tsc --build && node ./dist/client.js"
+  },
+  "author": "abinash phulkonwar",
+  "license": "ISC"
+}
