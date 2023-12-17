@@ -1,5 +1,4 @@
 import { createECDH, createCipheriv } from "crypto";
-
 const curve = "prime256v1";
 
 // Alice's Identity Key
