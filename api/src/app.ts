@@ -1,6 +1,7 @@
 import express from "express";
 import { createServer } from "node:http";
 import { Server } from "socket.io";
+import { authRouter } from "./api/routes/auth";
 
 const app = express();
 const server = createServer(app);
@@ -10,9 +11,7 @@ io.on("connection", (socket) => {
   console.log("a user connected");
 });
 
-app.get("/", (req, res) => {
-  res.send("hiiii");
-});
+app.use("/api/auth", authRouter);
 app.all("*", (req, res) => {
   res.status(404).send("not found");
 });

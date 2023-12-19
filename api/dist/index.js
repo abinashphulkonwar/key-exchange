@@ -11,6 +11,6 @@ mongoose_1.default
     console.log("Connected to MongoDB");
 })
     .catch((err) => console.log(err));
-app_1.server.listen(3000, () => {
+app_1.server.listen(3001, () => {
     console.log("server running at http://localhost:3000");
 });
