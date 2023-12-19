@@ -1,0 +1,15 @@
+server:
+  host: "localhost"
+  port: 3000
+
+node:
+  - node1:
+    scheme: "http"
+    target:
+      - "localhost:3001"
+    path: "/api"
+  - node2:
+    scheme: "http"
+    target:
+      - "localhost:5173"
+    path: "*"
