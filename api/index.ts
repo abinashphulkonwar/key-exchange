@@ -1,3 +1,6 @@
+if (process.env.NODE_ENV !== "production") {
+  require("dotenv").config();
+}
 import mongoose from "mongoose";
 import { server } from "./src/app";
 
