@@ -2,14 +2,16 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 interface Attrs {
-  username: string;
+  email: string;
+  password: string;
 }
 
 interface Doc extends mongoose.Document {
   _id: mongoose.Schema.Types.ObjectId;
-  username: string;
+  email: string;
   createdAt: Date;
   updatedAt: Date;
+  password: string;
 }
 interface Module extends mongoose.Model<Doc> {
   build(attrs: Attrs): Doc;
@@ -17,7 +19,11 @@ interface Module extends mongoose.Model<Doc> {
 
 const DocSchema = new Schema(
   {
-    username: {
+    email: {
+      type: String,
+      required: true,
+    },
+    password: {
       type: String,
       required: true,
     },
@@ -30,7 +36,8 @@ const DocSchema = new Schema(
 const User = mongoose.model<Doc, Module>("User", DocSchema);
 
 DocSchema.statics.build = (attrs: Attrs) => {
-  if (!attrs.username) throw new Error("username is required");
+  if (!attrs.email) throw new Error("email is required");
+  if (!attrs.password) throw new Error("password  is required");
 
   return new User(attrs);
 };
