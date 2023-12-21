@@ -4,7 +4,7 @@ export function Index() {
   return (
     <Box>
       <Heading>Create Account</Heading>
-      <form action="http://localhost:3000/api/auth/login" method="post">
+      <form action="http://localhost:3000/api/auth/signup" method="post">
         <Box>
           <Text>Email</Text>
           <Input
