@@ -7,17 +7,23 @@ exports.User = void 0;
 const mongoose_1 = __importDefault(require("mongoose"));
 const Schema = mongoose_1.default.Schema;
 const DocSchema = new Schema({
-    username: {
+    email: {
+        type: String,
+        required: true,
+    },
+    password: {
         type: String,
         required: true,
     },
 }, {
     timestamps: true,
 });
-const User = mongoose_1.default.model("User", DocSchema);
-exports.User = User;
 DocSchema.statics.build = (attrs) => {
-    if (!attrs.username)
-        throw new Error("username is required");
+    if (!attrs.email)
+        throw new Error("email is required");
+    if (!attrs.password)
+        throw new Error("password  is required");
     return new User(attrs);
 };
+const User = mongoose_1.default.model("User", DocSchema);
+exports.User = User;
