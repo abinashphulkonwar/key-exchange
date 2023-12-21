@@ -33,13 +33,13 @@ const DocSchema = new Schema(
   }
 );
 
-const User = mongoose.model<Doc, Module>("User", DocSchema);
-
 DocSchema.statics.build = (attrs: Attrs) => {
   if (!attrs.email) throw new Error("email is required");
   if (!attrs.password) throw new Error("password  is required");
 
   return new User(attrs);
 };
+
+const User = mongoose.model<Doc, Module>("User", DocSchema);
 
 export { User };
