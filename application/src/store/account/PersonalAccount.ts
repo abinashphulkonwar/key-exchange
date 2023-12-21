@@ -2,7 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   _id: "",
-  username: "",
+  email: "",
 };
 
 export const PersonalAccount = createSlice({
@@ -13,17 +13,10 @@ export const PersonalAccount = createSlice({
       state.email = action.payload.email;
     },
     signupEmailPassword: (state, action) => {
-      const { email, name, token, time, id, isCreateAccount, refreshToken } =
-        action.payload;
+      const { email } = action.payload;
       let userId = id || "";
       state.email = email;
-      state.name = name;
-      state.idToken = token;
-      state.token = refreshToken ? `${token} ${refreshToken}` : token;
-      state.time = time;
-      state.refreshToken = refreshToken;
-      if (!isCreateAccount) state.isLogIn = true;
-      state.id = userId;
+      state._id = userId;
     },
 
     onGetNotification: (state) => {
