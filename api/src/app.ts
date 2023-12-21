@@ -1,19 +1,25 @@
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
+require("express-async-errors");
 import { createServer } from "node:http";
 import { Server } from "socket.io";
 import { authRouter } from "./api/routes/auth";
 import cookieSession from "cookie-session";
+import { ApplicationError } from "./services/application-error";
+import morgan from "morgan";
 
 const app = express();
+
 const server = createServer(app);
 const io = new Server(server);
 
 io.on("connection", (socket) => {
   console.log("a user connected");
 });
+app.use(morgan("tiny"));
 
-app.set("trust proxy", 1); // trust first proxy
-
+app.set("trust proxy", true);
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 app.use(
   cookieSession({
     signed: false,
@@ -24,6 +30,19 @@ app.use(
 app.use("/api/auth", authRouter);
 app.all("*", (req, res) => {
   res.status(404).send("not found");
+});
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (err instanceof ApplicationError) {
+      res.status(err.statusCode).send(err.serializeErrors());
+    } else {
+      res.status(500).send("something went wrong");
+    }
+  } catch (err: any) {
+    console.log(err);
+    res.status(500).send(err.message);
+  }
 });
 
 export { server };
