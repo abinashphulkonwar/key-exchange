@@ -12,6 +12,8 @@ const auth_1 = require("./api/routes/auth");
 const cookie_session_1 = __importDefault(require("cookie-session"));
 const application_error_1 = require("./services/application-error");
 const morgan_1 = __importDefault(require("morgan"));
+const chat_1 = require("./api/routes/chat");
+const current_user_1 = require("./services/current-user");
 const app = (0, express_1.default)();
 const server = (0, node_http_1.createServer)(app);
 exports.server = server;
@@ -29,6 +31,7 @@ app.use((0, cookie_session_1.default)({
     maxAge: 1000 * 60 * 60 * 24 * 30 * 12 * 2,
 }));
 app.use("/api/auth", auth_1.authRouter);
+app.use("/api/chat", current_user_1.currentUser, current_user_1.requiredAuth, chat_1.chatRouter);
 app.all("*", (req, res) => {
     res.status(404).send("not found");
 });
