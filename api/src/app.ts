@@ -6,6 +6,8 @@ import { authRouter } from "./api/routes/auth";
 import cookieSession from "cookie-session";
 import { ApplicationError } from "./services/application-error";
 import morgan from "morgan";
+import { chatRouter } from "./api/routes/chat";
+import { currentUser, requiredAuth } from "./services/current-user";
 
 const app = express();
 
@@ -28,6 +30,7 @@ app.use(
   })
 );
 app.use("/api/auth", authRouter);
+app.use("/api/chat", currentUser, requiredAuth, chatRouter);
 app.all("*", (req, res) => {
   res.status(404).send("not found");
 });
