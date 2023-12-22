@@ -18,7 +18,7 @@ export const signupController = async (
   const user = User.build({ email, password: hashedPassword });
   await user.save();
   const token = await V3.encrypt({ id: user.id }, KeyPasto, {
-    expiresIn: "2 hours",
+    expiresIn: "1 year",
   });
   req.session = {
     id: token,
@@ -41,7 +41,7 @@ export const loginController = async (
   if (!isSame) throw new ApplicationError("Password is incorrect", 400);
 
   const token = await V3.encrypt({ id: user.id }, KeyPasto, {
-    expiresIn: "2 hours",
+    expiresIn: "1 year",
   });
   req.session = {
     id: token,
@@ -54,13 +54,10 @@ export const currentUserController = async (
   res: Response,
   next: NextFunction
 ) => {
-  const token = req.session?.id;
-  console.log(req.session, token);
-  if (!token) return res.status(401).send();
-  const payload = await V3.decrypt(token, KeyPasto);
-  const user = await User.findById(payload.id);
-  if (!user) return res.status(401).send();
-  delete payload.iat;
-  delete payload.exp;
-  res.send(payload);
+  // @ts-ignore
+  delete req.user.exp;
+  // @ts-ignore
+  delete req.user.iat;
+
+  res.send(req.user);
 };
