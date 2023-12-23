@@ -40,7 +40,7 @@ export const Index = () => {
       <Heading>Key Exchanger</Heading>
       {users_list.map((user) => {
         return (
-          <Box>
+          <Box boxShadow="xs" p="6" rounded="md" bg="white" mb={5}>
             <Text>{user._id}</Text>
             <Text>{user.email}</Text>
           </Box>

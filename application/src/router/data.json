@@ -1,0 +1,36 @@
+{
+    "root": {
+        "path": "app",
+        "element": {
+            "component": "app route",
+            "ErrorBoundary": "error app"
+        },
+        "child": {
+            "login": {
+                "path": "login",
+                "element": {
+                    "component": "login route",
+                    "ErrorBoundary": "error login"
+                },
+                "child": {
+                    "data": {
+                        "path": "data",
+                        "element": {
+                            "component": "user login route 🚀",
+                            "ErrorBoundary": "error app 🚀"
+                        },
+                        "child": {}
+                    }
+                }
+            },
+            "account": {
+                "path": "account",
+                "element": {
+                    "component": "account route 🦸🚀",
+                    "ErrorBoundary": "error account"
+                },
+                "child": {}
+            }
+        }
+    }
+}
