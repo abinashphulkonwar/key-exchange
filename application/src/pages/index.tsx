@@ -1,5 +1,5 @@
 import { Box, Flex, Heading, Spacer, Text } from "@chakra-ui/react";
-import { useLoaderData, Link } from "react-router-dom";
+import { useLoaderData, Link, Outlet } from "react-router-dom";
 import { getCurrentUser } from "../web-api/user";
 import { getUsersList } from "../web-api/get-users-list";
 
@@ -46,6 +46,7 @@ export const Index = () => {
           </Box>
         );
       })}
+      <Outlet />
     </Box>
   );
 };

@@ -1,8 +1,9 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NotFoundScreen from "./404";
+import { RouteTree } from "./router";
 
 const pages = import.meta.glob("./pages/**/*.tsx", { eager: true });
-const routes = [];
+const routeTree = new RouteTree("");
 for (const path of Object.keys(pages)) {
   const fileName = path.match(/\.\/pages\/(.*)\.tsx$/)?.[1];
   if (!fileName) {
@@ -12,31 +13,45 @@ for (const path of Object.keys(pages)) {
   const normalizedPathName = fileName.includes("$")
     ? fileName.replace("$", ":")
     : fileName.replace(/\/index/, "");
-  routes.push({
-    path: fileName === "index" ? "/" : `/${normalizedPathName.toLowerCase()}`,
+
+  const routePath =
+    fileName === "index" ? "/" : `/${normalizedPathName.toLowerCase()}`;
+  console.log(fileName, routePath);
+  const IndexCom = pages[path]?.Index;
+  const element = {
     // @ts-ignore
-    Element: pages[path]?.Index,
+    ErrorBoundary: pages[path]?.ErrorBoundary,
+    // @ts-ignore
+    component: pages[path]?.Index ? <IndexCom /> : null,
     // @ts-ignore
     loader: pages[path]?.Loader,
     // @ts-ignore
     action: pages[path]?.action,
-    // @ts-ignore
-    ErrorBoundary: pages[path]?.ErrorBoundary,
-  });
+  };
+  console.log("element :", element);
+  routeTree.insert(routePath, element);
+  console.log(routeTree);
+
+  // routes.push({
+  //   path: ,
+  //   Element: pages[path]?.Index,
+  //   // @ts-ignore
+  //   loader: pages[path]?.Loader,
+  //   // @ts-ignore
+  //   action: pages[path]?.action,
+  //   // @ts-ignore
+  //   ErrorBoundary: pages[path]?.ErrorBoundary,
+  // });
 }
-
-routes.push({
-  path: "*",
-  Element: NotFoundScreen,
-});
-
-const router = createBrowserRouter(
-  routes.map(({ Element, ErrorBoundary, ...rest }) => ({
-    ...rest,
-    element: <Element />,
-    ...(ErrorBoundary && { errorElement: <ErrorBoundary /> }),
-  }))
-);
+const routes = routeTree.create();
+console.log(routes);
+const router = createBrowserRouter([
+  routes,
+  {
+    path: "*",
+    Component: NotFoundScreen,
+  },
+]);
 
 const App = () => {
   return (

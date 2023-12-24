@@ -6,6 +6,25 @@ interface element {
   ErrorBoundary: string;
 }
 
+const buildRoutes = (data: node): RouteObject => {
+  const res: RouteObject = {};
+  if (data.element) {
+    res.element = data.element;
+  }
+  if (data.path) {
+    res.path = data.path;
+  }
+  const childs = [];
+  for (const key in data.child) {
+    if (data.child[key]) {
+      const childRes = buildRoutes(data.child[key]);
+      childs.push(childRes);
+    }
+  }
+  res.children = childs;
+  return res;
+};
+
 class node {
   path: string;
   element?: element;
@@ -55,27 +74,8 @@ class Tree {
       }
     });
   }
-  create(): RouteObject[] {
-    const routes: RouteObject[] = [];
-    const paths: node[] = [];
-    paths.push(this.root);
-
-    let index = 0;
-
-    while (paths.length) {
-      const current = paths.pop();
-      if (current?.element) {
-        routes.push({
-          path: current.path,
-          // @ts-ignore
-          element: current?.element,
-        });
-      }
-      for (const key in current?.child) {
-        const child = current?.child[key];
-      }
-    }
-
+  create(): RouteObject {
+    const routes = buildRoutes(this.root);
     return routes;
   }
 }
