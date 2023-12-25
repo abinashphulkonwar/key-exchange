@@ -1,6 +1,6 @@
 import { RouteObject } from "react-router-dom";
 interface element {
-  component: React.ReactNode;
+  component: React.ComponentType<{}> | null | undefined;
   loader: () => any;
   action: () => any;
   ErrorBoundary: React.ComponentType<{}> | null | undefined;
@@ -9,15 +9,14 @@ interface element {
 const buildRoutes = (data: node): RouteObject => {
   const res: RouteObject = {};
   if (data.element?.component) {
-    res.element = data.element.component;
+    res.Component = data.element.component;
     res.loader = data.element?.loader;
     res.action = data.element?.action;
     res.ErrorBoundary = data.element?.ErrorBoundary;
   }
 
-  if (data.path) {
-    res.path = data.path;
-  }
+  res.path = data.path || "/";
+
   const childs = [];
   for (const key in data.child) {
     if (data.child[key]) {
@@ -35,7 +34,7 @@ class node {
   child: { [key: string]: node };
   constructor(path: string, element?: element) {
     this.path = path;
-    if (this.element) this.element = element;
+    this.element = element;
     this.child = {};
   }
 }
@@ -45,7 +44,11 @@ export class RouteTree {
     this.root = new node(path, element);
   }
   insert(path: string, element: element) {
-    const paths = path.split("/").filter((val) => val.length > 0);
+    if (path === "/") {
+      this.root.element = element;
+      return;
+    }
+    const paths = path.split("/");
     let current = this.root;
     // if (!paths.length || this.root.path != paths[0]) {
     //   console.log("Invalid");
