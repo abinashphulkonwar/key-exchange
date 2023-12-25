@@ -16,13 +16,12 @@ for (const path of Object.keys(pages)) {
 
   const routePath =
     fileName === "index" ? "/" : `/${normalizedPathName.toLowerCase()}`;
-  console.log(fileName, routePath);
   const IndexCom = pages[path]?.Index;
   const element = {
     // @ts-ignore
-    ErrorBoundary: pages[path]?.ErrorBoundary,
+    ErrorBoundary: pages[path]?.ErrorBoundary || null,
     // @ts-ignore
-    component: pages[path]?.Index ? <IndexCom /> : null,
+    component: pages[path]?.Index ? IndexCom : NotFoundScreen,
     // @ts-ignore
     loader: pages[path]?.Loader,
     // @ts-ignore
@@ -44,7 +43,6 @@ for (const path of Object.keys(pages)) {
   // });
 }
 const routes = routeTree.create();
-console.log(routes);
 const router = createBrowserRouter([
   routes,
   {
