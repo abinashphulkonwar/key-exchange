@@ -1,19 +1,31 @@
 import { Box, Flex, Heading, Spacer, Text } from "@chakra-ui/react";
-import { useLoaderData, Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLoaderData } from "react-router-dom";
 import { getCurrentUser } from "../web-api/user";
 import { getUsersList } from "../web-api/get-users-list";
 
 export const Loader = async ({}: { request: Request }) => {
-  console.log("Loader");
+  try {
+    console.log("Loader");
 
-  const user = await getCurrentUser();
-  console.log(user);
-  const users_list = await getUsersList();
+    const user = await getCurrentUser();
 
-  return {
-    user: user,
-    users_list: users_list,
-  };
+    console.log(user);
+    const users_list = await getUsersList();
+
+    return {
+      user: user,
+      users_list: users_list,
+    };
+  } catch (err) {
+    console.log(err);
+
+    return {
+      user: {
+        isLogin: null,
+      },
+      users_list: [],
+    };
+  }
 };
 
 export const Index = () => {
@@ -32,11 +44,14 @@ export const Index = () => {
           <Spacer />
           <Link to={"/auth/signup"}>Create Account</Link>
         </Flex>
+        <Outlet />
       </Box>
     );
   }
   return (
     <Box>
+      <Outlet />
+
       <Heading>Key Exchanger</Heading>
       {users_list.map((user) => {
         return (
@@ -46,7 +61,6 @@ export const Index = () => {
           </Box>
         );
       })}
-      <Outlet />
     </Box>
   );
 };
