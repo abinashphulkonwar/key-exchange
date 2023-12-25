@@ -1,0 +1,23 @@
+{
+    "root": {
+        "path": "/",
+        "element": {
+            "ErrorBoundary": null
+        },
+        "child": {
+            "auth": {
+                "path": "auth",
+                "child": {
+                    "login": {
+                        "path": "login",
+                        "child": {}
+                    },
+                    "signup": {
+                        "path": "signup",
+                        "child": {}
+                    }
+                }
+            }
+        }
+    }
+}
