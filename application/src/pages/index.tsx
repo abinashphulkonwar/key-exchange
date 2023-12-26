@@ -50,17 +50,26 @@ export const Index = () => {
   }
   return (
     <Box>
-      <Outlet />
-
-      <Heading>Key Exchanger</Heading>
-      {users_list.map((user) => {
-        return (
-          <Box boxShadow="xs" p="6" rounded="md" bg="white" mb={5}>
-            <Text>{user._id}</Text>
-            <Text>{user.email}</Text>
+      <Flex>
+        <Box mx={5} pt={5} overflowY={"scroll"} height={"100vh"}>
+          <Heading>Key Exchanger</Heading>
+          <Box mt={5}>
+            {users_list.map((user) => {
+              return (
+                <Link to={`/chat/${user._id}`} state={user} key={user._id}>
+                  <Box boxShadow="xs" p="6" rounded="md" bg="white" mb={5}>
+                    <Text>{user._id}</Text>
+                    <Text>{user.email}</Text>
+                  </Box>
+                </Link>
+              );
+            })}
           </Box>
-        );
-      })}
+        </Box>
+        <Box flex={1}>
+          <Outlet />
+        </Box>
+      </Flex>
     </Box>
   );
 };
