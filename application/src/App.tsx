@@ -16,6 +16,7 @@ for (const path of Object.keys(pages)) {
 
   const routePath =
     fileName === "index" ? "/" : `/${normalizedPathName.toLowerCase()}`;
+  // @ts-ignore
   const IndexCom = pages[path]?.Index;
   const element = {
     // @ts-ignore
@@ -52,11 +53,7 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return (
-    <div style={{ marginTop: "8px" }}>
-      <RouterProvider router={router} />
-    </div>
-  );
+  return <RouterProvider router={router} />;
 };
 
 export default App;
