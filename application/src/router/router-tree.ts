@@ -1,6 +1,6 @@
 import { RouteObject } from "react-router-dom";
 interface element {
-  component: string;
+  component: any;
   loader: () => any;
   action: () => any;
   ErrorBoundary: string;
@@ -9,7 +9,7 @@ interface element {
 const buildRoutes = (data: node): RouteObject => {
   const res: RouteObject = {};
   if (data.element) {
-    res.element = data.element;
+    res.Component = data.element.component;
   }
   if (data.path) {
     res.path = data.path;
