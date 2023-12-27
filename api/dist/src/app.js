@@ -14,6 +14,7 @@ const application_error_1 = require("./services/application-error");
 const morgan_1 = __importDefault(require("morgan"));
 const chat_1 = require("./api/routes/chat");
 const current_user_1 = require("./services/current-user");
+const key_1 = require("./api/routes/key");
 const app = (0, express_1.default)();
 const server = (0, node_http_1.createServer)(app);
 exports.server = server;
@@ -32,6 +33,7 @@ app.use((0, cookie_session_1.default)({
 }));
 app.use("/api/auth", auth_1.authRouter);
 app.use("/api/chat", current_user_1.currentUser, current_user_1.requiredAuth, chat_1.chatRouter);
+app.use("/api/key", current_user_1.currentUser, current_user_1.requiredAuth, key_1.keyRouter);
 app.all("*", (req, res) => {
     res.status(404).send("not found");
 });
