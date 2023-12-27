@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 interface Attrs {
   public_key: string;
-  userId: mongoose.Schema.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId | string;
 }
 
 interface Doc extends mongoose.Document {
