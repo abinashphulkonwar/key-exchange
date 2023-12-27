@@ -8,6 +8,7 @@ import { ApplicationError } from "./services/application-error";
 import morgan from "morgan";
 import { chatRouter } from "./api/routes/chat";
 import { currentUser, requiredAuth } from "./services/current-user";
+import { keyRouter } from "./api/routes/key";
 
 const app = express();
 
@@ -31,6 +32,7 @@ app.use(
 );
 app.use("/api/auth", authRouter);
 app.use("/api/chat", currentUser, requiredAuth, chatRouter);
+app.use("/api/key", currentUser, requiredAuth, keyRouter);
 app.all("*", (req, res) => {
   res.status(404).send("not found");
 });
