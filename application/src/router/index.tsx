@@ -71,8 +71,6 @@ export class RouteTree {
           current = current.child[val];
         } else {
           if (isEnd) {
-            console.log("hii", element);
-
             current.child[val] = new node(val, element);
             return;
           }

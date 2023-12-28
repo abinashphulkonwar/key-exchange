@@ -3,6 +3,7 @@ import { KeyDB } from "./key";
 
 const database_name = "key-exchanger";
 const database_version = 1;
+
 export class ApplicationDb {
   private static connection: IDBPDatabase<unknown> | null = null;
 

@@ -28,9 +28,7 @@ for (const path of Object.keys(pages)) {
     // @ts-ignore
     action: pages[path]?.action,
   };
-  console.log("element :", element);
   routeTree.insert(routePath, element);
-  console.log(routeTree);
 
   // routes.push({
   //   path: ,
