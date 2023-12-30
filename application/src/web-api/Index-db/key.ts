@@ -20,7 +20,8 @@ export class KeyDB {
     isVersionChange: boolean
   ) {
     if (KeyDB.ref) {
-      throw new Error("KeyDB already initialized");
+      console.log("KeyDB already initialized");
+      return;
     }
     console.log("init key db");
     KeyDB.ref = new Schema(
