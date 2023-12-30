@@ -74,6 +74,7 @@ export class Schema<TSchema, TAttrs> {
     if (!db.name) {
       throw new Error("No database name");
     }
+
     if (!db.indexKey) {
       throw new Error("No index key");
     }

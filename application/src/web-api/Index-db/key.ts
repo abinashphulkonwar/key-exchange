@@ -15,21 +15,34 @@ type keydbAttars = {
 export class KeyDB {
   private static ref: Schema<keydb, keydbAttars> | null = null;
 
-  static async init(connection: IDBPDatabase<unknown>) {
+  static async init(
+    connection: IDBPDatabase<unknown>,
+    isVersionChange: boolean
+  ) {
     if (KeyDB.ref) {
       throw new Error("KeyDB already initialized");
     }
-    KeyDB.ref = new Schema({
-      connection: connection,
-      name: key,
-      indexKey: "id",
-      isAutoincrement: true,
-    });
+    console.log("init key db");
+    KeyDB.ref = new Schema(
+      {
+        connection: connection,
+        name: key,
+        indexKey: "id",
+        isAutoincrement: true,
+      },
+      isVersionChange
+    );
   }
   static save(data: keydbAttars) {
     if (!KeyDB.ref) {
       throw new Error("KeyDB not initialized");
     }
     return KeyDB.ref.save(data);
+  }
+  static find() {
+    if (!KeyDB.ref) {
+      throw new Error("KeyDB not initialized");
+    }
+    return KeyDB.ref.find();
   }
 }
