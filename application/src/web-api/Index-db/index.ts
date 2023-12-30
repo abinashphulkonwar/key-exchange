@@ -10,6 +10,7 @@ export class ApplicationDb {
   private static isVersionChange: boolean;
   private static async open() {
     console.log("Opening database");
+
     openDB(database_name, database_version, {
       async upgrade(database) {
         ApplicationDb.isVersionChange = true;
