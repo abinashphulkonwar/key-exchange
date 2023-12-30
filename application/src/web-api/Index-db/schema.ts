@@ -67,11 +67,35 @@ export class Schema<TSchema, TAttrs> {
     return data;
   }
 
-  protected async findById(id: number): Promise<TSchema | null> {
-    const data = (await this.connection.get(this.name, id)) as TSchema;
+  async findOne(query: TSchema): Promise<TSchema | null> {
+    for (const key in query) {
+      const keyValue = query[key] as IDBValidKey;
+      const isQueryParam = this.checkQueryParams(keyValue);
+      if (!isQueryParam) continue;
+      if (key === "id") return await this.findById(keyValue);
+      return await this.findOneByIndex(key, keyValue);
+    }
+
+    return null;
+  }
+
+  protected async findOneByIndex(
+    index: string,
+    value: IDBValidKey
+  ): Promise<TSchema | null> {
+    const data = (await this.connection.getFromIndex(
+      this.name,
+      index,
+      value
+    )) as TSchema;
+
     return data;
   }
 
+  protected async findById(id: IDBValidKey): Promise<TSchema | null> {
+    const data = (await this.connection.get(this.name, id)) as TSchema;
+    return data;
+  }
   protected checkQueryParams(value: any) {
     if (!value) return false;
     if (
@@ -83,24 +107,6 @@ export class Schema<TSchema, TAttrs> {
     }
     return true;
   }
-
-  async findOne(query: TSchema): Promise<TSchema | null> {
-    for (const key in query) {
-      const keyValue = query[key] as IDBValidKey;
-      const isQueryParam = this.checkQueryParams(keyValue);
-      if (!isQueryParam) continue;
-      if (key === "id") {
-        const data = (await this.connection.get(
-          this.name,
-          keyValue
-        )) as TSchema;
-        return data;
-      }
-    }
-
-    return null;
-  }
-
   protected verifyDB(db: db) {
     if (!db.connection) {
       throw new Error("No database connection");
