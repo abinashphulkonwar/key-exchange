@@ -1,15 +1,15 @@
 import { IDBPDatabase } from "idb";
 import { Schema } from "./schema";
-const key = "message";
+const key = "chat-session";
 
 type docdb = {
   id: number;
   name: string;
-  reciver_id: string;
+  reciver_id: number;
 };
 type Attars = {
   name: string;
-  reciver_id: string;
+  reciver_id: number;
 };
 
 export class chatSessionDB {
