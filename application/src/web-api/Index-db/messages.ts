@@ -40,7 +40,8 @@ export class messageDB {
     isVersionChange: boolean
   ) {
     if (messageDB.ref) {
-      throw new Error("messageDB already initialized");
+      console.log("messageDB already initialized");
+      return;
     }
     console.log("init message db");
     messageDB.ref = new Schema(
