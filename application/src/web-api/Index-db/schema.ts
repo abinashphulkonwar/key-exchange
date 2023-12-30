@@ -10,7 +10,7 @@ interface db {
     command: "create" | "delete" | "recreate";
   }[];
 }
-export class Schema<TSchema, TAttrs> {
+export class Schema<TSchema, TAttrs, TQuery> {
   protected connection: IDBPDatabase<unknown>;
   protected name: string;
   constructor(db: db, isVersionChange: boolean) {
@@ -58,8 +58,7 @@ export class Schema<TSchema, TAttrs> {
   }
 
   save(data: TAttrs) {
-    this.connection.add(this.name, data);
-    return true;
+    return this.connection.add(this.name, data);
   }
 
   async find(): Promise<TSchema[]> {
@@ -67,7 +66,7 @@ export class Schema<TSchema, TAttrs> {
     return data;
   }
 
-  async findOne(query: TSchema): Promise<TSchema | null> {
+  async findOne(query: TQuery): Promise<TSchema | null> {
     for (const key in query) {
       const keyValue = query[key] as IDBValidKey;
       const isQueryParam = this.checkQueryParams(keyValue);
