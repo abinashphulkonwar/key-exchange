@@ -17,7 +17,7 @@ export const signupController = async (
   const hashedPassword = await Password.toHash(password);
   const user = User.build({ email, password: hashedPassword });
   await user.save();
-  const token = await V3.encrypt({ id: user.id }, KeyPasto, {
+  const token = await V3.encrypt({ _id: user.id }, KeyPasto, {
     expiresIn: "1 year",
   });
   req.session = {
@@ -40,7 +40,7 @@ export const loginController = async (
   const isSame = await Password.compare(user?.password, password);
   if (!isSame) throw new ApplicationError("Password is incorrect", 400);
 
-  const token = await V3.encrypt({ id: user.id }, KeyPasto, {
+  const token = await V3.encrypt({ _id: user.id }, KeyPasto, {
     expiresIn: "1 year",
   });
   req.session = {
