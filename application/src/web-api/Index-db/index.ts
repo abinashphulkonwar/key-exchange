@@ -1,6 +1,7 @@
 import { openDB, IDBPDatabase } from "idb";
 import { KeyDB } from "./key";
 import { messageDB } from "./messages";
+import { chatSessionDB } from "./chat-session";
 
 const database_name = "key-exchanger";
 const database_version = 1;
@@ -34,5 +35,6 @@ export class ApplicationDb {
   private static async db_init(database: IDBPDatabase<unknown>) {
     await KeyDB.init(database, ApplicationDb.isVersionChange);
     await messageDB.init(database, ApplicationDb.isVersionChange);
+    await chatSessionDB.init(database, ApplicationDb.isVersionChange);
   }
 }
