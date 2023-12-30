@@ -7,13 +7,18 @@ type docdb = {
   name: string;
   reciver_id: number;
 };
+type docdbQuery = {
+  id?: number;
+  name?: string;
+  reciver_id?: number;
+};
 type Attars = {
   name: string;
   reciver_id: number;
 };
 
 export class chatSessionDB {
-  private static ref: Schema<docdb, Attars> | null = null;
+  private static ref: Schema<docdb, Attars, docdbQuery> | null = null;
 
   static async init(
     connection: IDBPDatabase<unknown>,
@@ -61,5 +66,11 @@ export class chatSessionDB {
       throw new Error("chatSessionDB not initialized");
     }
     return chatSessionDB.ref.find();
+  }
+  static findOne(query: docdbQuery) {
+    if (!chatSessionDB.ref) {
+      throw new Error("chatSessionDB not initialized");
+    }
+    return chatSessionDB.ref.findOne(query);
   }
 }

@@ -13,7 +13,7 @@ type keydbAttars = {
 };
 
 export class KeyDB {
-  private static ref: Schema<keydb, keydbAttars> | null = null;
+  private static ref: Schema<keydb, keydbAttars, any> | null = null;
 
   static async init(
     connection: IDBPDatabase<unknown>,

@@ -33,7 +33,7 @@ type messageDBAttars = {
 };
 
 export class messageDB {
-  private static ref: Schema<messageDBdb, messageDBAttars> | null = null;
+  private static ref: Schema<messageDBdb, messageDBAttars, any> | null = null;
 
   static async init(
     connection: IDBPDatabase<unknown>,

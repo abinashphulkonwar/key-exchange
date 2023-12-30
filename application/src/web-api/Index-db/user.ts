@@ -8,6 +8,13 @@ type docdb = {
   name: string;
   profile: string;
 };
+type docdbQuery = {
+  id?: number;
+  _id?: string;
+  name?: string;
+  profile?: string;
+};
+
 type Attars = {
   name: string;
   _id: string;
@@ -16,7 +23,7 @@ type Attars = {
 };
 
 export class userDB {
-  private static ref: Schema<docdb, Attars> | null = null;
+  private static ref: Schema<docdb, Attars, docdbQuery> | null = null;
 
   static async init(
     connection: IDBPDatabase<unknown>,
@@ -57,5 +64,11 @@ export class userDB {
       throw new Error("chatSessionDB not initialized");
     }
     return userDB.ref.find();
+  }
+  static findOne(query: docdbQuery) {
+    if (!userDB.ref) {
+      throw new Error("chatSessionDB not initialized");
+    }
+    return userDB.ref.findOne(query);
   }
 }
