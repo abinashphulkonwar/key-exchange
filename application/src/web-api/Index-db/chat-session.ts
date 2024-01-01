@@ -3,18 +3,18 @@ import { Schema } from "./schema";
 const key = "chat-session";
 
 type docdb = {
-  id: number;
+  id: IDBValidKey;
   name: string;
-  reciver_id: number;
+  reciver_id: IDBValidKey;
 };
 type docdbQuery = {
   id?: number;
   name?: string;
-  reciver_id?: number;
+  reciver_id?: IDBValidKey;
 };
 type Attars = {
   name: string;
-  reciver_id: number;
+  reciver_id: IDBValidKey;
 };
 
 export class chatSessionDB {

@@ -3,7 +3,7 @@ import { Schema } from "./schema";
 const key = "user";
 
 type docdb = {
-  id: number;
+  id: IDBValidKey;
   _id: string;
   name: string;
   profile: string;

@@ -3,12 +3,12 @@ import { Schema } from "./schema";
 const key = "message";
 
 type messageDBdb = {
-  id: number;
-  session_id: number;
+  id: IDBValidKey;
+  session_id: IDBValidKey;
   created_at: Date;
   content: string;
-  sender_id: string;
-  reciver_id: string;
+  sender_id: IDBValidKey;
+  reciver_id: IDBValidKey;
   is_read: boolean;
   read_time: Date;
   is_deleted: boolean;
@@ -18,18 +18,18 @@ type messageDBdb = {
   deliverd_time: Date;
 };
 type messageDBAttars = {
-  session_id: number;
+  session_id: IDBValidKey;
   created_at: Date;
   content: string;
-  sender_id: string;
-  reciver_id: string;
+  sender_id: IDBValidKey;
+  reciver_id: IDBValidKey;
   is_read: boolean;
-  read_time: Date;
+  read_time: Date | null;
   is_deleted: boolean;
-  deleted_time: Date;
+  deleted_time: Date | null;
   is_sent: boolean;
   is_deliverd: boolean;
-  deliverd_time: Date;
+  deliverd_time: Date | null;
 };
 
 export class messageDB {
@@ -54,7 +54,7 @@ export class messageDB {
           {
             field: "session_id",
             options: {
-              unique: true,
+              unique: false,
             },
             command: "create",
           },
