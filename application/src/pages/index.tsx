@@ -30,7 +30,7 @@ export const Loader = async ({}: { request: Request }) => {
 
 export const Index = () => {
   const { user, users_list } = useLoaderData() as {
-    user: { isLogin: boolean };
+    user: { isLogin: boolean; _id: string };
     users_list: { _id: string; email: string }[];
   };
 
@@ -48,18 +48,26 @@ export const Index = () => {
       </Box>
     );
   }
+
   return (
     <Box>
       <Flex>
         <Box mx={5} pt={5} overflowY={"scroll"} height={"100vh"}>
           <Heading>Key Exchanger</Heading>
           <Box mt={5}>
-            {users_list.map((user) => {
+            {users_list.map((user_chat) => {
               return (
-                <Link to={`/chat/${user._id}`} state={user} key={user._id}>
+                <Link
+                  to={`/chat/${user_chat._id}`}
+                  state={{
+                    user: user_chat,
+                    device_user_id: user._id,
+                  }}
+                  key={user_chat._id}
+                >
                   <Box boxShadow="xs" p="6" rounded="md" bg="white" mb={5}>
-                    <Text>{user._id}</Text>
-                    <Text>{user.email}</Text>
+                    <Text>{user_chat._id}</Text>
+                    <Text>{user_chat.email}</Text>
                   </Box>
                 </Link>
               );
