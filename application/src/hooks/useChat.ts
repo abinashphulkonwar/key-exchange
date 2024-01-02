@@ -1,6 +1,6 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { chatSessionDB } from "../web-api/Index-db/chat-session";
-import { messageDB } from "../web-api/Index-db/messages";
+import { messageDB, messageDBdb } from "../web-api/Index-db/messages";
 import { userDB } from "../web-api/Index-db/user";
 
 export const useChats = ({
@@ -12,6 +12,7 @@ export const useChats = ({
   name: string;
   profile: string;
 }) => {
+  const [messages, setMessages] = useState<messageDBdb[]>([]);
   const ref = useRef<{
     session_id: IDBValidKey;
     sender_id: IDBValidKey;
@@ -22,20 +23,13 @@ export const useChats = ({
     reciver_id: 0,
   });
 
-  const setupCurrentUser = async ({ _id }: { _id: string }) => {
+  const getMessages = async () => {
     try {
-      const user = await userDB.findOne({
-        _id: _id,
+      const messages_list = await messageDB.find({
+        session_id: ref.current.session_id,
       });
-
-      if (!user || user == null) {
-        await userDB.save({
-          _id: _id,
-          name: "device user",
-          profile: "",
-        });
-      }
-      ref.current.sender_id = user?.id || 0;
+      console.log("messages: ", messages_list);
+      setMessages(messages_list);
     } catch (err: any) {
       console.log(err.message);
     }
@@ -68,7 +62,38 @@ export const useChats = ({
       }
       ref.current.reciver_id = key;
       ref.current.session_id = session_key;
+      await getMessages();
     } catch (error) {}
+  };
+
+  useEffect(() => {
+    try {
+      init();
+      return () => {
+        setMessages([]);
+      };
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }, [_id]);
+
+  const setupCurrentUser = async ({ _id }: { _id: string }) => {
+    try {
+      const user = await userDB.findOne({
+        _id: _id,
+      });
+
+      if (!user || user == null) {
+        await userDB.save({
+          _id: _id,
+          name: "device user",
+          profile: "",
+        });
+      }
+      ref.current.sender_id = user?.id || 0;
+    } catch (err: any) {
+      console.log(err.message);
+    }
   };
 
   const save = async (message: string) => {
@@ -81,7 +106,8 @@ export const useChats = ({
       "message: ",
       message
     );
-    await messageDB.save({
+
+    const key = await messageDB.save({
       content: message,
       session_id: ref.current.session_id,
       created_at: time,
@@ -95,11 +121,15 @@ export const useChats = ({
       is_deliverd: false,
       deliverd_time: null,
     });
+    const record = await messageDB.findOne({ id: key });
+    if (record) {
+      setMessages((prev) => [...prev, record]);
+    }
   };
 
   return {
-    init,
     save,
     setupCurrentUser,
+    messages,
   };
 };
