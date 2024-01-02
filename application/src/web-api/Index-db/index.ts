@@ -3,6 +3,7 @@ import { KeyDB } from "./key";
 import { messageDB } from "./messages";
 import { chatSessionDB } from "./chat-session";
 import { userDB } from "./user";
+import { ApplicationCrypto } from "../web-crypto";
 
 const database_name = "key-exchanger";
 const database_version = 1;
@@ -21,6 +22,8 @@ export class ApplicationDb {
     }).then((connection) => {
       console.log("Database opened");
       ApplicationDb.connection = connection;
+      if (ApplicationDb.isVersionChange) return;
+
       ApplicationDb.isVersionChange = false;
 
       ApplicationDb.db_init(connection);
@@ -38,5 +41,6 @@ export class ApplicationDb {
     await messageDB.init(database, ApplicationDb.isVersionChange);
     await chatSessionDB.init(database, ApplicationDb.isVersionChange);
     await userDB.init(database, ApplicationDb.isVersionChange);
+    await ApplicationCrypto.getNewKey();
   }
 }
