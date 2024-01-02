@@ -65,21 +65,28 @@ export class KeyDB {
             options: {
               unique: false,
             },
-            command: "recreate",
+            command: "create",
           },
           {
             field: "assigned_user_id",
             options: {
               unique: false,
             },
-            command: "recreate",
+            command: "create",
           },
           {
             field: "public_key",
             options: {
               unique: false,
             },
-            command: "recreate",
+            command: "create",
+          },
+          {
+            field: "status",
+            options: {
+              unique: false,
+            },
+            command: "create",
           },
         ],
       },
