@@ -61,9 +61,27 @@ export class Schema<TSchema, TAttrs, TQuery> {
     return this.connection.add(this.name, data);
   }
 
-  async find(): Promise<TSchema[]> {
-    const data = (await this.connection.getAll(this.name)) as TSchema[];
-    return data;
+  async find(query?: TQuery): Promise<TSchema[]> {
+    if (!query) {
+      const data = (await this.connection.getAll(this.name)) as TSchema[];
+      return data;
+    }
+    for (const key in query) {
+      const keyValue = query[key] as IDBValidKey;
+      const isQueryParam = this.checkQueryParams(keyValue);
+      if (!isQueryParam) continue;
+      if (key === "id") {
+        const data = (await this.findById(keyValue)) as TSchema;
+        if (!data) return [];
+        return [data];
+      }
+      return (await this.connection.getAllFromIndex(
+        this.name,
+        key,
+        keyValue
+      )) as TSchema[];
+    }
+    return [];
   }
 
   async findOne(query: TQuery): Promise<TSchema | null> {
