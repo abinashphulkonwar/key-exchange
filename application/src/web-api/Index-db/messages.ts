@@ -2,7 +2,7 @@ import { IDBPDatabase } from "idb";
 import { Schema } from "./schema";
 const key = "message";
 
-type messageDBdb = {
+export type messageDBdb = {
   id: IDBValidKey;
   session_id: IDBValidKey;
   created_at: Date;
@@ -17,7 +17,24 @@ type messageDBdb = {
   is_deliverd: boolean;
   deliverd_time: Date;
 };
-type messageDBAttars = {
+
+type docdbQuery = {
+  id?: IDBValidKey;
+  session_id?: IDBValidKey;
+  created_at?: Date;
+  content?: string;
+  sender_id?: IDBValidKey;
+  reciver_id?: IDBValidKey;
+  is_read?: boolean;
+  read_time?: Date;
+  is_deleted?: boolean;
+  deleted_time?: Date;
+  is_sent?: boolean;
+  is_deliverd?: boolean;
+  deliverd_time?: Date;
+};
+export type messageDBAttars = {
+  id?: IDBValidKey;
   session_id: IDBValidKey;
   created_at: Date;
   content: string;
@@ -69,10 +86,16 @@ export class messageDB {
     }
     return messageDB.ref.save(data);
   }
-  static find() {
+  static find(query: docdbQuery) {
     if (!messageDB.ref) {
       throw new Error("messageDB not initialized");
     }
-    return messageDB.ref.find();
+    return messageDB.ref.find(query);
+  }
+  static findOne(query: docdbQuery) {
+    if (!messageDB.ref) {
+      throw new Error("chatSessionDB not initialized");
+    }
+    return messageDB.ref.findOne(query);
   }
 }
