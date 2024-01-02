@@ -10,6 +10,10 @@ interface db {
     command: "create" | "delete" | "recreate";
   }[];
 }
+export interface TCount {
+  field: string;
+  value: string;
+}
 export class Schema<TSchema, TAttrs, TQuery> {
   protected connection: IDBPDatabase<unknown>;
   protected name: string;
@@ -33,6 +37,7 @@ export class Schema<TSchema, TAttrs, TQuery> {
         autoIncrement: db.isAutoincrement,
       });
     }
+    console.log("indexed: ", this.name);
     if (!store_ref)
       store_ref = this.connection.transaction(db.name, "versionchange").store;
     if (db.indexs && db.indexs.length) {
@@ -52,6 +57,7 @@ export class Schema<TSchema, TAttrs, TQuery> {
             unique: index.options?.unique || false,
             multiEntry: index.options?.multiEntry || false,
           });
+          console.log("index created", index);
         }
       });
     }
@@ -82,6 +88,15 @@ export class Schema<TSchema, TAttrs, TQuery> {
       )) as TSchema[];
     }
     return [];
+  }
+
+  async count(query: TCount) {
+    const data = await this.find();
+    if (!data) return 0;
+    if (!query) return data.length;
+    if (!query.field || !query.value) return data.length;
+    // @ts-ignore
+    return data.filter((val) => val[query?.field] === query?.value).length;
   }
 
   async findOne(query: TQuery): Promise<TSchema | null> {
