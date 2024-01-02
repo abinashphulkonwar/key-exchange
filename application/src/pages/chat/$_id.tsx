@@ -1,12 +1,4 @@
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  Spacer,
-  Text,
-  Textarea,
-} from "@chakra-ui/react";
+import { Box, Button, Flex, Heading, Text, Textarea } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
 import { useLoaderData, useLocation, useParams } from "react-router-dom";
 import { useChats } from "../../hooks/useChat";
@@ -44,7 +36,7 @@ export const Index = () => {
 
   const user = useMemo(() => {
     return {
-      _id: state.device_user_id || loader._id,
+      _id: state?.device_user_id || loader._id,
     };
   }, [loader, state]);
 
@@ -58,8 +50,6 @@ export const Index = () => {
   const init = async () => {
     try {
       await useChat.setupCurrentUser({ _id: user._id });
-
-      await useChat.init();
     } catch (err: any) {
       console.log(err.message);
     }
@@ -67,11 +57,12 @@ export const Index = () => {
 
   useEffect(() => {
     try {
+      console.log("rerender: ", state.user.email);
       init();
     } catch (err: any) {
       console.log(err.message);
     }
-  }, []);
+  }, [params._id]);
 
   const onMessageHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setMessage(e.target.value);
@@ -79,15 +70,15 @@ export const Index = () => {
 
   const onSendHandler = async () => {
     try {
-      console.log("send message: ", message);
       await useChat.save(message);
+      setMessage("");
     } catch (err: any) {
       console.log(err.message);
     }
   };
 
   return (
-    <Box w={"100%"} h={"100%"} p={5}>
+    <Box w={"100%"} maxH={"100vh"} h={"100%"} p={5}>
       <Flex flexDirection={"column"} h={"100%"}>
         <Box>
           <Heading as="h4" size="md" mb={2}>
@@ -96,10 +87,13 @@ export const Index = () => {
 
           <Text fontSize="sm">{params._id}</Text>
         </Box>
-        <Box>
-          <Text>hiii</Text>
+        <Box flex={1} paddingY={10} overflowY={"scroll"}>
+          <Box>
+            {useChat.messages.map((message) => {
+              return <Text key={message.id.toString()}>{message.content}</Text>;
+            })}
+          </Box>
         </Box>
-        <Spacer />
 
         <Box>
           <Flex alignItems={"center"}>
