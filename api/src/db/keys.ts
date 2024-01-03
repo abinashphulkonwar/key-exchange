@@ -4,14 +4,18 @@ const Schema = mongoose.Schema;
 interface Attrs {
   public_key: string;
   userId: mongoose.Schema.Types.ObjectId | string;
+  device_key_id: number;
+  state: "unassigned" | "pushed";
 }
 
 interface Doc extends mongoose.Document {
   _id: mongoose.Schema.Types.ObjectId;
-  public_key: string;
+  public_key: JsonWebKey;
   userId: mongoose.Schema.Types.ObjectId;
   createdAt: Date;
   updatedAt: Date;
+  device_key_id: number;
+  state: "assigned" | "unassigned" | "deleted" | "pushed";
 }
 interface Module extends mongoose.Model<Doc> {
   build(attrs: Attrs): Doc;
@@ -20,7 +24,7 @@ interface Module extends mongoose.Model<Doc> {
 const DocSchema = new Schema(
   {
     public_key: {
-      type: String,
+      type: Object,
       required: true,
     },
     userId: {
@@ -28,6 +32,15 @@ const DocSchema = new Schema(
       ref: "User",
       required: true,
       index: true,
+    },
+    device_key_id: {
+      type: Number,
+      required: true,
+    },
+    state: {
+      type: String,
+      required: true,
+      enum: ["assigned", "unassigned", "deleted", "pushed"],
     },
   },
   {

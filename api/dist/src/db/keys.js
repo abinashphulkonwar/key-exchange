@@ -8,7 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const Schema = mongoose_1.default.Schema;
 const DocSchema = new Schema({
     public_key: {
-        type: String,
+        type: Object,
         required: true,
     },
     userId: {
@@ -16,6 +16,15 @@ const DocSchema = new Schema({
         ref: "User",
         required: true,
         index: true,
+    },
+    device_key_id: {
+        type: Number,
+        required: true,
+    },
+    state: {
+        type: String,
+        required: true,
+        enum: ["assigned", "unassigned", "deleted", "pushed"],
     },
 }, {
     timestamps: true,
