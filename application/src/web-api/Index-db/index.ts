@@ -42,5 +42,6 @@ export class ApplicationDb {
     await chatSessionDB.init(database, ApplicationDb.isVersionChange);
     await userDB.init(database, ApplicationDb.isVersionChange);
     await ApplicationCrypto.getNewKey();
+    await ApplicationCrypto.push_keys();
   }
 }
