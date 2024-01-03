@@ -6,7 +6,9 @@ type docdb = {
   id: IDBValidKey;
   name: string;
   reciver_id: IDBValidKey;
+  shared_key: CryptoKey;
 };
+
 type docdbQuery = {
   id?: number;
   name?: string;
