@@ -129,6 +129,36 @@ export class Schema<TSchema, TAttrs, TQuery> {
     const data = (await this.connection.get(this.name, id)) as TSchema;
     return data;
   }
+
+  async findAndUpdate(query: TQuery[], data: TQuery[]) {
+    if (!query || !data) {
+      return false;
+    }
+
+    const transaction = this.connection.transaction(this.name, "readwrite");
+    const transaction_events = [];
+    for (let i = 0; i < query.length; i++) {
+      const q = query[i];
+      const d = data[i];
+      if (!q || !d) break;
+      for (const key in q) {
+        const keyValue = q[key] as IDBValidKey;
+        const isQueryParam = this.checkQueryParams(keyValue);
+        if (!isQueryParam) continue;
+        transaction_events.push(transaction.store.put(d));
+        break;
+      }
+    }
+    transaction_events.push(transaction.done);
+    await Promise.all(transaction_events);
+    console.log(
+      "transection done on store: ",
+      this.name,
+      "item updated: ",
+      data.length
+    );
+    return true;
+  }
   protected checkQueryParams(value: any) {
     if (!value) return false;
     if (
