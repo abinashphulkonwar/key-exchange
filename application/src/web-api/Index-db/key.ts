@@ -5,7 +5,8 @@ export const keydb_status_assigned = "assigned";
 export const keydb_status_unassigned = "unassigned";
 
 export const keydb_status_deleted = "deleted";
-export type keydb_status = "assigned" | "unassigned" | "deleted";
+export const keydb_status_pushed = "pushed";
+export type keydb_status = "assigned" | "unassigned" | "deleted" | "pushed";
 type keydb = {
   id: number;
   public_key: JsonWebKey;
@@ -112,5 +113,12 @@ export class KeyDB {
       throw new Error("KeyDB not initialized");
     }
     return KeyDB.ref.count(query);
+  }
+
+  static findAndUpdate(query: docQuery[], data: docQuery[]) {
+    if (!KeyDB.ref) {
+      throw new Error("KeyDB not initialized");
+    }
+    return KeyDB.ref.findAndUpdate(query, data);
   }
 }
