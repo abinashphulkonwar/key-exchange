@@ -11,18 +11,30 @@ export const addUserkeys = async (
   res: Response,
   next: NextFunction
 ) => {
-  const body = req.body as unknown as {
-    key: string;
-  };
-  const key = Key.build({
-    public_key: body.key,
-    userId: req.user._id,
-  });
+  try {
+    const body = req.body as unknown as {
+      device_key_id: number;
+      public_key: JsonWebKey;
+    }[];
 
-  await key.save();
+    const keys = await Key.insertMany(
+      body.map((val) => {
+        return {
+          public_key: val.public_key,
+          userId: req.user._id,
+          device_key_id: val.device_key_id,
+          state: "pushed",
+        };
+      })
+    );
 
-  res.send({
-    message: "key added",
-    status: "ok",
-  });
+    res.send({
+      message: "key added",
+      status: "ok",
+      keys: keys,
+    });
+  } catch (err: any) {
+    console.log(err.message);
+    return next(new ApplicationError(err.message, 500));
+  }
 };
