@@ -1,6 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import NotFoundScreen from "./404";
 import { RouteTree } from "./router";
+import { WSContextProvider } from "./context/ws";
 
 const pages = import.meta.glob("./pages/**/*.tsx", { eager: true });
 const routeTree = new RouteTree("");
@@ -51,7 +52,11 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
-  return <RouterProvider router={router} />;
+  return (
+    <WSContextProvider>
+      <RouterProvider router={router} />
+    </WSContextProvider>
+  );
 };
 
 export default App;

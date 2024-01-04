@@ -2,6 +2,8 @@ import { Box, Flex, Heading, Spacer, Text } from "@chakra-ui/react";
 import { Link, Outlet, useLoaderData } from "react-router-dom";
 import { getCurrentUser } from "../web-api/user";
 import { getUsersList } from "../web-api/get-users-list";
+import { useContext, useEffect } from "react";
+import { WSContext } from "../context/ws";
 
 export const Loader = async ({}: { request: Request }) => {
   try {
@@ -33,6 +35,17 @@ export const Index = () => {
     user: { isLogin: boolean; _id: string };
     users_list: { _id: string; email: string }[];
   };
+
+  const wsContext = useContext(WSContext);
+
+  useEffect(() => {
+    try {
+      if (!user.isLogin) return;
+      wsContext.setUpUser(user);
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }, [user.isLogin]);
 
   if (!user.isLogin) {
     return (
