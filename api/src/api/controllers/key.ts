@@ -38,3 +38,27 @@ export const addUserkeys = async (
     return next(new ApplicationError(err.message, 500));
   }
 };
+export const getUserKey = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const body = req.body as unknown as {
+      userId: string;
+    };
+    const key = await Key.findOne({
+      userId: body.userId,
+      state: "pushed",
+    });
+    if (!key) throw new ApplicationError("keys are not generated", 422);
+
+    res.send({
+      public_key: key?.public_key,
+    });
+    await Key.findByIdAndUpdate(key._id, { state: "assigned" });
+  } catch (err: any) {
+    console.log(err.message);
+    return next(new ApplicationError(err.message, 500));
+  }
+};
