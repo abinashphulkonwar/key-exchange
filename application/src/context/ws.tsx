@@ -38,6 +38,22 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
       socket.on("connect", () => {
         console.log("connected");
       });
+
+      socket.on(
+        "c-get-key-event",
+        async (data: {
+          key: JsonWebKey;
+          _id: string;
+          status: "ok" | "error";
+        }) => {
+          console.log(data);
+          if (data.status === "ok") {
+            console.log(data.key);
+          } else {
+            console.log("error");
+          }
+        }
+      );
     } catch (error) {}
   }, [user]);
   const setUpUser = (user: user) => {
