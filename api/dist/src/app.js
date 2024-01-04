@@ -23,6 +23,11 @@ const io = new socket_io_1.Server(server);
 io.use(auth_2.isAuthenticated);
 io.on("connection", (socket) => {
     console.log("a user connected", socket.id);
+    socket.join(socket.id);
+    socket.on("disconnect", () => {
+        console.log("disconnected");
+        socket.leave(socket.id);
+    });
 });
 app.use((0, morgan_1.default)("tiny"));
 app.set("trust proxy", true);

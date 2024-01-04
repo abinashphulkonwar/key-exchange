@@ -17,6 +17,12 @@ const DocSchema = new Schema({
         required: true,
         index: true,
     },
+    assigned_user_id: {
+        type: mongoose_1.default.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+        index: true,
+    },
     device_key_id: {
         type: Number,
         required: true,
@@ -24,7 +30,7 @@ const DocSchema = new Schema({
     state: {
         type: String,
         required: true,
-        enum: ["assigned", "unassigned", "deleted", "pushed"],
+        enum: ["assigned", "unassigned", "deleted", "pushed", "send"],
     },
 }, {
     timestamps: true,
