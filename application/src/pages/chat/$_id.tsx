@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLoaderData, useLocation, useParams } from "react-router-dom";
 import { useChats } from "../../hooks/useChat";
 import { getCurrentUser } from "../../web-api/user";
+import { UseSendMessage } from "../../hooks/useSendMessage";
 
 export const Loader = async ({ request }: { request: Request }) => {
   try {
@@ -41,6 +42,13 @@ export const Index = () => {
   }, [loader, state]);
 
   const useChat = useChats({
+    id: 0,
+    _id: params._id || "",
+    name: state?.user.email,
+    profile: "",
+  });
+
+  UseSendMessage({
     id: 0,
     _id: params._id || "",
     name: state?.user.email,
