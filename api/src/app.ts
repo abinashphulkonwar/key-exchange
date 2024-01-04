@@ -10,6 +10,7 @@ import { chatRouter } from "./api/routes/chat";
 import { currentUser, requiredAuth } from "./services/current-user";
 import { keyRouter } from "./api/routes/key";
 import { isAuthenticated } from "./handler/auth";
+import { diffie_hellman } from "./handler/diffie-hellman ";
 
 const app = express();
 
@@ -19,6 +20,7 @@ io.use(isAuthenticated);
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
   socket.join(socket.id);
+  diffie_hellman(socket);
   socket.on("disconnect", () => {
     console.log("disconnected");
     socket.leave(socket.id);
