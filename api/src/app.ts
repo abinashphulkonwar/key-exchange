@@ -18,6 +18,11 @@ const io = new Server(server);
 io.use(isAuthenticated);
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id);
+  socket.join(socket.id);
+  socket.on("disconnect", () => {
+    console.log("disconnected");
+    socket.leave(socket.id);
+  });
 });
 
 app.use(morgan("tiny"));
