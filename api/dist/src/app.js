@@ -15,12 +15,14 @@ const morgan_1 = __importDefault(require("morgan"));
 const chat_1 = require("./api/routes/chat");
 const current_user_1 = require("./services/current-user");
 const key_1 = require("./api/routes/key");
+const auth_2 = require("./handler/auth");
 const app = (0, express_1.default)();
 const server = (0, node_http_1.createServer)(app);
 exports.server = server;
 const io = new socket_io_1.Server(server);
+io.use(auth_2.isAuthenticated);
 io.on("connection", (socket) => {
-    console.log("a user connected");
+    console.log("a user connected", socket.id);
 });
 app.use((0, morgan_1.default)("tiny"));
 app.set("trust proxy", true);

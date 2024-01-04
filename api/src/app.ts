@@ -9,15 +9,17 @@ import morgan from "morgan";
 import { chatRouter } from "./api/routes/chat";
 import { currentUser, requiredAuth } from "./services/current-user";
 import { keyRouter } from "./api/routes/key";
+import { isAuthenticated } from "./handler/auth";
 
 const app = express();
 
 const server = createServer(app);
 const io = new Server(server);
-
+io.use(isAuthenticated);
 io.on("connection", (socket) => {
-  console.log("a user connected");
+  console.log("a user connected", socket.id);
 });
+
 app.use(morgan("tiny"));
 
 app.set("trust proxy", true);
