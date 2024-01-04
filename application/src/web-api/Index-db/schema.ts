@@ -115,7 +115,6 @@ export class Schema<TSchema, TAttrs, TQuery> {
     index: string,
     value: IDBValidKey
   ): Promise<TSchema | null> {
-    console.log("get from index");
     const data = (await this.connection.getFromIndex(
       this.name,
       index,

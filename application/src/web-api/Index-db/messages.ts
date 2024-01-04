@@ -60,7 +60,6 @@ export class messageDB {
       console.log("messageDB already initialized");
       return;
     }
-    console.log("init message db");
     messageDB.ref = new Schema(
       {
         connection: connection,

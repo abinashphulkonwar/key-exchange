@@ -53,7 +53,6 @@ export class KeyDB {
       console.log("KeyDB already initialized");
       return;
     }
-    console.log("init key db");
     KeyDB.ref = new Schema(
       {
         connection: connection,

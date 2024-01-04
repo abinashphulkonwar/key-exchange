@@ -30,7 +30,6 @@ export class chatSessionDB {
       console.log("chatSessionDB already initialized");
       return;
     }
-    console.log("init chat session db");
     chatSessionDB.ref = new Schema(
       {
         connection: connection,

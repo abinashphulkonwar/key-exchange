@@ -1,39 +1,35 @@
 import { IDBPDatabase } from "idb";
 import { Schema } from "./schema";
-const key = "user";
+const key = "events";
 
 type docdb = {
   id: IDBValidKey;
-  _id: string;
-  name: string;
-  profile: string;
+  type: "push_message" | "pull_keys";
 };
+
 type docdbQuery = {
   id?: number;
-  _id?: string;
   name?: string;
-  profile?: string;
+  reciver_id?: IDBValidKey;
 };
-
 type Attars = {
   name: string;
-  _id: string;
-
-  profile: string;
+  reciver_id: IDBValidKey;
 };
 
-export class userDB {
+export class ventsDB {
   private static ref: Schema<docdb, Attars, docdbQuery> | null = null;
 
   static async init(
     connection: IDBPDatabase<unknown>,
     isVersionChange: boolean
   ) {
-    if (userDB.ref) {
-      console.log("usersDB already initialized");
+    if (ventsDB.ref) {
+      console.log("ventsDB already initialized");
       return;
     }
-    userDB.ref = new Schema(
+    console.log("init vents db");
+    ventsDB.ref = new Schema(
       {
         connection: connection,
         name: key,
@@ -41,7 +37,14 @@ export class userDB {
         isAutoincrement: true,
         indexs: [
           {
-            field: "_id",
+            field: "name",
+            options: {
+              unique: true,
+            },
+            command: "create",
+          },
+          {
+            field: "reciver_id",
             options: {
               unique: true,
             },
@@ -53,21 +56,21 @@ export class userDB {
     );
   }
   static save(data: Attars) {
-    if (!userDB.ref) {
-      throw new Error("userDB not initialized");
+    if (!ventsDB.ref) {
+      throw new Error("ventsDB not initialized");
     }
-    return userDB.ref.save(data);
+    return ventsDB.ref.save(data);
   }
   static find() {
-    if (!userDB.ref) {
-      throw new Error("chatSessionDB not initialized");
+    if (!ventsDB.ref) {
+      throw new Error("ventsDB not initialized");
     }
-    return userDB.ref.find();
+    return ventsDB.ref.find();
   }
   static findOne(query: docdbQuery) {
-    if (!userDB.ref) {
-      throw new Error("chatSessionDB not initialized");
+    if (!ventsDB.ref) {
+      throw new Error("ventsDB not initialized");
     }
-    return userDB.ref.findOne(query);
+    return ventsDB.ref.findOne(query);
   }
 }
