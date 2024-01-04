@@ -4,7 +4,7 @@ import { User } from "../db/user";
 import { KeyPasto } from "./token";
 import { ApplicationError } from "./application-error";
 
-interface UserPayload {
+export interface UserPayload {
   _id: string;
   iat: number;
   exp: number;
