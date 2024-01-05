@@ -11,6 +11,7 @@ import { currentUser, requiredAuth } from "./services/current-user";
 import { keyRouter } from "./api/routes/key";
 import { isAuthenticated } from "./handler/auth";
 import { diffie_hellman } from "./handler/diffie-hellman";
+import { events_emiter } from "./handler/events-emiter";
 
 const app = express();
 
@@ -21,6 +22,8 @@ io.on("connection", (socket) => {
   console.log("a user connected", socket.id, new Date());
   socket.join(socket.id);
   diffie_hellman(socket);
+  events_emiter(socket);
+
   socket.on("disconnect", () => {
     console.log("disconnected", socket.id, new Date());
     socket.leave(socket.id);

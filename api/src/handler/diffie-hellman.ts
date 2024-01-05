@@ -50,6 +50,7 @@ export const diffie_hellman = (socket: Socket) => {
       socket.to(key.userId.toString()).emit(key_event.client, {
         type: event.type,
         key: event.key,
+        event_id: event._id,
       });
       socket.emit("c-ack-get-key-event", {
         status: "ok",

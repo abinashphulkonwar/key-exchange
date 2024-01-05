@@ -17,6 +17,7 @@ const current_user_1 = require("./services/current-user");
 const key_1 = require("./api/routes/key");
 const auth_2 = require("./handler/auth");
 const diffie_hellman_1 = require("./handler/diffie-hellman");
+const events_emiter_1 = require("./handler/events-emiter");
 const app = (0, express_1.default)();
 const server = (0, node_http_1.createServer)(app);
 exports.server = server;
@@ -26,6 +27,7 @@ io.on("connection", (socket) => {
     console.log("a user connected", socket.id, new Date());
     socket.join(socket.id);
     (0, diffie_hellman_1.diffie_hellman)(socket);
+    (0, events_emiter_1.events_emiter)(socket);
     socket.on("disconnect", () => {
         console.log("disconnected", socket.id, new Date());
         socket.leave(socket.id);
