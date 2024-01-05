@@ -16,18 +16,18 @@ const chat_1 = require("./api/routes/chat");
 const current_user_1 = require("./services/current-user");
 const key_1 = require("./api/routes/key");
 const auth_2 = require("./handler/auth");
-const diffie_hellman_1 = require("./handler/diffie-hellman ");
+const diffie_hellman_1 = require("./handler/diffie-hellman");
 const app = (0, express_1.default)();
 const server = (0, node_http_1.createServer)(app);
 exports.server = server;
 const io = new socket_io_1.Server(server);
 io.use(auth_2.isAuthenticated);
 io.on("connection", (socket) => {
-    console.log("a user connected", socket.id);
+    console.log("a user connected", socket.id, new Date());
     socket.join(socket.id);
     (0, diffie_hellman_1.diffie_hellman)(socket);
     socket.on("disconnect", () => {
-        console.log("disconnected");
+        console.log("disconnected", socket.id, new Date());
         socket.leave(socket.id);
     });
 });
