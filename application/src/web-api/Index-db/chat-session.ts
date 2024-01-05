@@ -13,6 +13,7 @@ type docdbQuery = {
   id?: number;
   name?: string;
   reciver_id?: IDBValidKey;
+  shared_key?: CryptoKey;
 };
 type Attars = {
   name: string;
@@ -73,5 +74,11 @@ export class chatSessionDB {
       throw new Error("chatSessionDB not initialized");
     }
     return chatSessionDB.ref.findOne(query);
+  }
+  static findAndUpdate(query: docdbQuery[], data: docdbQuery[]) {
+    if (!chatSessionDB.ref) {
+      throw new Error("chatSessionDB not initialized");
+    }
+    return chatSessionDB.ref.findAndUpdate(query, data);
   }
 }
