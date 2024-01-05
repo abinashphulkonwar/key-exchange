@@ -139,11 +139,13 @@ export class Schema<TSchema, TAttrs, TQuery> {
     for (let i = 0; i < query.length; i++) {
       const q = query[i];
       const d = data[i];
+
       if (!q || !d) break;
       for (const key in q) {
         const keyValue = q[key] as IDBValidKey;
         const isQueryParam = this.checkQueryParams(keyValue);
         if (!isQueryParam) continue;
+
         transaction_events.push(transaction.store.put(d));
         break;
       }

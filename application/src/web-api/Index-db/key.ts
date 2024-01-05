@@ -120,4 +120,10 @@ export class KeyDB {
     }
     return KeyDB.ref.findAndUpdate(query, data);
   }
+  static findOne(query: docQuery) {
+    if (!KeyDB.ref) {
+      throw new Error("KeyDB not initialized");
+    }
+    return KeyDB.ref.findOne(query);
+  }
 }
