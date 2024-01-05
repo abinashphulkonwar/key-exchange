@@ -37,7 +37,9 @@ export const diffie_hellman = (socket: Socket) => {
         },
         { state: "assigned" }
       );
+
       if (!key) return;
+
       const event = Events.build({
         userId: key.userId,
         type: "key",
@@ -46,7 +48,9 @@ export const diffie_hellman = (socket: Socket) => {
           user_fetch_key_user_id: key?.assigned_user_id,
         },
       });
+
       await event.save();
+
       socket.to(key.userId.toString()).emit(key_event.client, {
         type: event.type,
         key: event.key,
