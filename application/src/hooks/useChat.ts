@@ -1,9 +1,74 @@
 import { useEffect, useRef, useState } from "react";
-import { chatSessionDB } from "../web-api/Index-db/chat-session";
+import { chatSessionDB, docdb } from "../web-api/Index-db/chat-session";
 import { messageDB, messageDBdb } from "../web-api/Index-db/messages";
 import { userDB } from "../web-api/Index-db/user";
+export const setupCurrentUserHandler = async (_id: string) => {
+  if (!_id) return;
+  const user = await userDB.findOne({
+    _id: _id,
+  });
 
-export const useChats = ({
+  if (!user || user == null) {
+    await userDB.save({
+      _id: _id,
+      name: "device user",
+      profile: "",
+    });
+  }
+  return user;
+};
+export const setUpChat = async ({
+  _id,
+  name,
+}: {
+  _id: string;
+  name: string;
+}) => {
+  try {
+    let key: IDBValidKey = 0;
+
+    const user = await userDB.findOne({
+      _id: _id,
+    });
+
+    if (!user) {
+      key = await userDB.save({
+        _id: _id,
+        name: name,
+        profile: "",
+      });
+    } else key = user.id;
+    let chatdb = (await chatSessionDB.findOne({
+      name: `chat:${_id}`,
+    })) as docdb;
+    if (!chatdb) {
+      const session_id = await chatSessionDB.save({
+        name: `chat:${_id}`,
+        reciver_id: key,
+      });
+      chatdb = (await chatSessionDB.findOne({
+        id: session_id,
+      })) as docdb;
+    }
+    return chatdb;
+  } catch (err: any) {
+    throw new Error(err.message);
+  }
+};
+export type useChats = ({
+  _id,
+  name,
+}: {
+  id: number;
+  _id: string;
+  name: string;
+  profile: string;
+}) => {
+  save: (message: string) => Promise<void>;
+  setupCurrentUser: ({ _id }: { _id: string }) => Promise<void>;
+  messages: messageDBdb[];
+};
+export const useChats: useChats = ({
   _id,
   name,
 }: {
@@ -37,31 +102,12 @@ export const useChats = ({
 
   const init = async () => {
     try {
-      let key: IDBValidKey = 0;
-      const user = await userDB.findOne({
+      const chatdb = await setUpChat({
         _id: _id,
+        name: name,
       });
-
-      if (!user) {
-        key = await userDB.save({
-          _id: _id,
-          name: name,
-          profile: "",
-        });
-      } else key = user.id;
-      let session_key: IDBValidKey = 0;
-      const chatdb = await chatSessionDB.findOne({
-        name: `chat:${_id}`,
-      });
-      session_key = chatdb?.id || 0;
-      if (!chatdb) {
-        session_key = await chatSessionDB.save({
-          name: `chat:${_id}`,
-          reciver_id: key,
-        });
-      }
-      ref.current.reciver_id = key;
-      ref.current.session_id = session_key;
+      ref.current.reciver_id = chatdb.reciver_id;
+      ref.current.session_id = chatdb.id;
       await getMessages();
     } catch (error) {}
   };
@@ -79,17 +125,7 @@ export const useChats = ({
 
   const setupCurrentUser = async ({ _id }: { _id: string }) => {
     try {
-      const user = await userDB.findOne({
-        _id: _id,
-      });
-
-      if (!user || user == null) {
-        await userDB.save({
-          _id: _id,
-          name: "device user",
-          profile: "",
-        });
-      }
+      const user = await setupCurrentUserHandler(_id);
       ref.current.sender_id = user?.id || 0;
     } catch (err: any) {
       console.log(err.message);

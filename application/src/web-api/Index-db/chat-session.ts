@@ -2,7 +2,7 @@ import { IDBPDatabase } from "idb";
 import { Schema } from "./schema";
 const key = "chat-session";
 
-type docdb = {
+export type docdb = {
   id: IDBValidKey;
   name: string;
   reciver_id: IDBValidKey;
@@ -10,7 +10,7 @@ type docdb = {
 };
 
 type docdbQuery = {
-  id?: number;
+  id?: IDBValidKey;
   name?: string;
   reciver_id?: IDBValidKey;
   shared_key?: CryptoKey;
