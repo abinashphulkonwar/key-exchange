@@ -9,6 +9,7 @@ const Schema = mongoose_1.default.Schema;
 const DocSchema = new Schema({
     public_key: {
         type: Object,
+        required: true,
     },
     userId: {
         type: mongoose_1.default.Schema.Types.ObjectId,

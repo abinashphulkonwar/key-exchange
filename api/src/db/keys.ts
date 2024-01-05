@@ -37,8 +37,6 @@ const DocSchema = new Schema(
     assigned_user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
-      index: true,
     },
     device_key_id: {
       type: Number,
@@ -55,15 +53,14 @@ const DocSchema = new Schema(
   }
 );
 
-// module.exports = mongoose.model("Chat", ChatSchema);
-// module.exports.chatSchema = ChatSchema;
-const Key = mongoose.model<Doc, Module>("Key", DocSchema);
-
 DocSchema.statics.build = (attrs: Attrs) => {
   if (!attrs.public_key) throw new Error("public_key is required");
   if (!attrs.userId) throw new Error("userId is required");
 
   return new Key(attrs);
 };
+// module.exports = mongoose.model("Chat", ChatSchema);
+// module.exports.chatSchema = ChatSchema;
+const Key = mongoose.model<Doc, Module>("Key", DocSchema);
 
 export { Key };
