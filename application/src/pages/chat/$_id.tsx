@@ -48,7 +48,7 @@ export const Index = () => {
     profile: "",
   });
 
-  UseSendMessage({
+  const useMessage = UseSendMessage({
     id: 0,
     _id: params._id || "",
     name: state?.user.email,
@@ -78,8 +78,9 @@ export const Index = () => {
 
   const onSendHandler = async () => {
     try {
-      await useChat.save(message);
+      //   await useChat.save(message);
       setMessage("");
+      await useMessage.decriptMessage();
     } catch (err: any) {
       console.log(err.message);
     }

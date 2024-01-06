@@ -9,7 +9,7 @@ const s_get_key_event = (socket: Socket) => {
   return async (data: { userId: string; event_id: string }) => {
     console.log("s-get-key-event: ", new Date(), socket.id);
     const chat_session = await Chat.findOne({
-      userId: { $in: [socket.user._id, data.userId] },
+      userId: { $all: [socket.user._id, data.userId] },
     });
     if (!chat_session) return;
     if (chat_session.keys[socket.user._id].state == "fetch") return;
@@ -39,7 +39,7 @@ export const diffie_hellman = (socket: Socket) => {
     async (data: { userId: string; _id: string; event_id: string }) => {
       console.log("s-ack");
       const chat_session = await Chat.findOne({
-        userId: { $in: [socket.user._id, data.userId] },
+        userId: { $all: [socket.user._id, data.userId] },
       });
       if (!chat_session) return;
       if (chat_session.keys[socket.user._id].state == "fetch") return;
@@ -80,10 +80,10 @@ export const diffie_hellman = (socket: Socket) => {
     console.log("s-init-chat", data);
     if (socket.user._id === data.userId) return;
     const chat_session = await Chat.findOne({
-      userId: { $in: [socket.user._id, data.userId] },
+      userId: { $all: [socket.user._id, data.userId] },
     });
+
     if (chat_session) return;
-    console.log(chat_session);
     const chat = Chat.build({
       userId: [socket.user._id, data.userId],
       keys: {
