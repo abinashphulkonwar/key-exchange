@@ -68,6 +68,8 @@ export const diffie_hellman = (socket: Socket) => {
           device_key_id: key.device_key_id,
           other_user: socket.user._id,
         },
+        state: "emiter",
+        worker_process_count: 0,
       });
       await event.save();
       socket.emit("c-ack-get-key-event", {
@@ -106,6 +108,8 @@ export const diffie_hellman = (socket: Socket) => {
         other_user_id: data.userId,
         name: other_user?.email || "",
       },
+      state: "emiter",
+      worker_process_count: 0,
     });
     await event_user_1.save();
     const event_user_2 = Events.build({
@@ -115,6 +119,8 @@ export const diffie_hellman = (socket: Socket) => {
         other_user_id: socket.user._id,
         name: socket.user.name || "",
       },
+      state: "emiter",
+      worker_process_count: 0,
     });
     await event_user_2.save();
     socket.emit(event_types.c_init_chat, {
