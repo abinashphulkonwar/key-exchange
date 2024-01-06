@@ -12,6 +12,8 @@ interface Attrs {
     other_user_id: mongoose.Schema.Types.ObjectId | string;
     name: string;
   };
+  state: "worker" | "emiter";
+  worker_process_count: number;
 }
 
 interface Doc extends mongoose.Document {
@@ -29,6 +31,9 @@ interface Doc extends mongoose.Document {
     other_user_id: mongoose.Schema.Types.ObjectId | string;
     name: string;
   };
+  last_process_time: Date;
+  state: "worker" | "emiter";
+  worker_process_count: number;
 }
 interface Module extends mongoose.Model<Doc> {
   build(attrs: Attrs): Doc;
@@ -63,6 +68,19 @@ const DocSchema = new Schema(
     },
     init_chat: {
       other_user_id: mongoose.Schema.Types.ObjectId,
+    },
+    last_process_time: {
+      type: Date,
+      default: new Date(),
+    },
+    worker_process_count: {
+      type: Number,
+      default: 0,
+    },
+    state: {
+      type: String,
+      enum: ["worker", "emiter"],
+      default: "worker",
     },
   },
   {
