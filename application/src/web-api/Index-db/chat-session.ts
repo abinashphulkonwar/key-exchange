@@ -5,7 +5,9 @@ const key = "chat-session";
 export type docdb = {
   id: IDBValidKey;
   name: string;
+
   reciver_id: IDBValidKey;
+  reciver_public_key: JsonWebKey;
   shared_key: CryptoKey;
 };
 
@@ -13,11 +15,13 @@ type docdbQuery = {
   id?: IDBValidKey;
   name?: string;
   reciver_id?: IDBValidKey;
+  reciver_public_key?: JsonWebKey;
   shared_key?: CryptoKey;
 };
 type Attars = {
   name: string;
   reciver_id: IDBValidKey;
+  reciver_public_key?: JsonWebKey;
 };
 
 export class chatSessionDB {

@@ -4,6 +4,7 @@ import { Socket } from "socket.io";
 import { KeyPasto } from "../services/token";
 import { UserPayload } from "../services/current-user";
 import { Buffer } from "safe-buffer";
+import { User } from "../db/user";
 
 declare module "socket.io" {
   interface Socket {
@@ -26,8 +27,10 @@ export const isAuthenticated = async (
       KeyPasto
     )) as UserPayload;
 
-    socket.user = payload;
+    const user = await User.findById(payload._id);
 
+    socket.user = payload;
+    socket.user.name = user?.email;
     next();
   } catch (err: any) {
     console.log(err.message);

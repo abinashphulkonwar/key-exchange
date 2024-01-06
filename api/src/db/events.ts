@@ -2,24 +2,32 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 interface Attrs {
-  userId: mongoose.Schema.Types.ObjectId;
-  type: "key";
-  key: {
+  userId: mongoose.Schema.Types.ObjectId | string;
+  type: "key" | "init_chat" | "init_chat_inform_about_private_key";
+  key?: {
     device_key_id: number;
-    user_fetch_key_user_id: mongoose.Schema.Types.ObjectId;
+    other_user: mongoose.Schema.Types.ObjectId | string;
+  };
+  init_chat?: {
+    other_user_id: mongoose.Schema.Types.ObjectId | string;
+    name: string;
   };
 }
 
 interface Doc extends mongoose.Document {
   _id: mongoose.Schema.Types.ObjectId;
 
-  userId: mongoose.Schema.Types.ObjectId;
+  userId: mongoose.Schema.Types.ObjectId | string;
   createdAt: Date;
   updatedAt: Date;
-  type: "key";
+  type: "key" | "init_chat" | "init_chat_inform_about_private_key";
   key: {
     device_key_id: number;
-    user_fetch_key_user_id: mongoose.Schema.Types.ObjectId;
+    other_user: mongoose.Schema.Types.ObjectId | string;
+  };
+  init_chat: {
+    other_user_id: mongoose.Schema.Types.ObjectId | string;
+    name: string;
   };
 }
 interface Module extends mongoose.Model<Doc> {
@@ -38,11 +46,23 @@ const DocSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ["key", "assigned", "unassigned", "deleted", "pushed", "send"],
+      enum: [
+        "init_chat",
+        "init_chat_inform_about_private_key",
+        "key",
+        "assigned",
+        "unassigned",
+        "deleted",
+        "pushed",
+        "send",
+      ],
     },
     key: {
       device_key_id: Number,
-      user_fetch_key_user_id: mongoose.Schema.Types.ObjectId,
+      other_user: mongoose.Schema.Types.ObjectId,
+    },
+    init_chat: {
+      other_user_id: mongoose.Schema.Types.ObjectId,
     },
   },
   {

@@ -8,6 +8,7 @@ export interface UserPayload {
   _id: string;
   iat: number;
   exp: number;
+  name?: string;
 }
 
 declare global {

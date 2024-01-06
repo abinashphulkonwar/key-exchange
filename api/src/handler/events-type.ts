@@ -6,4 +6,6 @@ export const key_event = {
 export const event_types = {
   client: "c-event:ack",
   server: "s-event:ack",
+  s_init_chat: "s-init-chat",
+  c_init_chat: "c-init-chat",
 };

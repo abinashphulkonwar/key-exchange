@@ -52,89 +52,129 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
           _id: string;
           status: "ok" | "error";
           user_id: string;
+          event_id: string;
         }) => {
           console.log("c-get-key-event: ", data);
-          if (data.status === "ok") {
-            const event_user = await userDB.findOne({ _id: data.user_id });
-            let user_key = await KeyDB.findOne({
-              assigned_user__id: event_user?._id,
-              assigned_user_id: event_user?.id,
+          const other_user = await userDB.findOne({ _id: data.user_id });
+          let chat = await chatSessionDB.findOne({
+            reciver_id: other_user?.id,
+          });
+
+          if (!chat) {
+            chat = await setUpChat({
+              _id: other_user?._id || "",
+              name: other_user?.name || "",
             });
-
-            if (!user_key) {
-              user_key = await KeyDB.findOne({ status: "pushed" });
-            }
-
-            const shared_key = await KeyPair.deriveKey(
-              user_key!.private_key,
-              data.key
-            );
-            let chat = await chatSessionDB.findOne({
-              reciver_id: event_user?.id,
-            });
-
-            if (!chat) {
-              chat = await setUpChat({
-                _id: event_user?._id || "",
-                name: event_user?.name || "",
-              });
-            }
-
-            await chatSessionDB.findAndUpdate(
-              [{ reciver_id: event_user?.id }],
-              [
-                {
-                  ...chat,
-                  shared_key: shared_key,
-                },
-              ]
-            );
-
-            socket.emit("s-ack-get-key-event", {
-              userId: event_user?._id,
-              _id: data._id,
-            });
-            await KeyDB.findAndUpdate(
-              [
-                {
-                  id: user_key!.id,
-                },
-              ],
-              [{ status: "assigned" }]
-            );
-          } else {
-            console.log("error");
           }
+
+          await chatSessionDB.findAndUpdate(
+            [{ reciver_id: other_user?.id }],
+            [
+              {
+                ...chat,
+                reciver_public_key: data.key,
+              },
+            ]
+          );
+
+          socket.emit("s-ack-get-key-event", {
+            userId: data?.user_id,
+            _id: data._id,
+            event_id: data.event_id,
+          });
         }
       );
       socket.on(
         key_event.client,
         async (event: {
-          type: "key";
+          type: "key" | "init_chat" | "init_chat_inform_about_private_key";
           key: {
             device_key_id: number;
-            user_fetch_key_user_id: string;
+            other_user: string;
           };
           event_id: string;
+          init_chat: {
+            other_user_id: string;
+            name: string;
+          };
         }) => {
-          if (event.type == "key") {
-            socket.emit(key_event.client_fetch, {
-              userId: event.key.user_fetch_key_user_id,
+          console.log(event.type);
+          // if (event.type == "key") {
+          //   socket.emit(key_event.client_fetch, {
+          //     userId: event.key.user_fetch_key_user_id,
+          //   });
+          //   const user = await userDB.findOne({
+          //     _id: event.key.user_fetch_key_user_id,
+          //   });
+          //   await KeyDB.findAndUpdate(
+          //     [{ id: event.key.device_key_id }],
+          //     [
+          //       {
+          //         assigned_user__id: event.key.user_fetch_key_user_id,
+          //         assigned_user_id: user?._id,
+          //         status: "assigned",
+          //       },
+          //     ]
+          //   );
+          //   socket.emit(key_event.server_ack, { _id: event.event_id });
+          //
+          if (event.type == "init_chat") {
+            await setupCurrentUserHandler(user?._id || "");
+            await setUpChat({
+              _id: event.init_chat.other_user_id,
+              name: event.init_chat.name,
             });
-            const user = await userDB.findOne({
-              _id: event.key.user_fetch_key_user_id,
+            socket.emit("s-get-key-event", {
+              userId: event.init_chat.other_user_id,
+              event_id: event.event_id,
             });
-            await KeyDB.findAndUpdate(
-              [{ id: event.key.device_key_id }],
+          }
+
+          if (event.type == "init_chat_inform_about_private_key") {
+            const other_user = await userDB.findOne({
+              _id: event.key.other_user,
+            });
+            console.log(other_user, event.key);
+            const key = await KeyDB.findOne({
+              id: event.key.device_key_id,
+            });
+            if (!key) return;
+            const chat_session = await chatSessionDB.findOne({
+              reciver_id: other_user?.id,
+            });
+            console.log(chat_session);
+            if (!chat_session) return;
+            const shared_key = await KeyPair.deriveKey(
+              key.private_key,
+              chat_session.reciver_public_key
+            );
+            await chatSessionDB.findAndUpdate(
+              [{ reciver_id: event.key.other_user }],
               [
                 {
-                  assigned_user__id: event.key.user_fetch_key_user_id,
-                  assigned_user_id: user?._id,
+                  ...chat_session,
+                  shared_key: shared_key,
+                },
+              ]
+            );
+            await KeyDB.findAndUpdate(
+              [
+                {
+                  id: event.key.device_key_id,
+                },
+              ],
+              [
+                {
+                  ...key,
+                  assigned_user__id: event.key.other_user,
                   status: "assigned",
                 },
               ]
             );
-            socket.emit(key_event.server_ack, { _id: event.event_id });
+            socket.emit(key_event.server_ack, {
+              _id: event.event_id,
+              userId: user?._id,
+            });
           }
         }
       );
