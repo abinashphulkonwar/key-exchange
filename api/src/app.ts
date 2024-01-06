@@ -11,7 +11,8 @@ import { currentUser, requiredAuth } from "./services/current-user";
 import { keyRouter } from "./api/routes/key";
 import { isAuthenticated } from "./handler/auth";
 import { diffie_hellman } from "./handler/diffie-hellman";
-import { events_emiter } from "./handler/events-emiter";
+import { events_emiter, events_emiter_worker } from "./handler/events-emiter";
+import { add_connection, remove_connection } from "./handler/connections";
 
 const app = express();
 
@@ -20,6 +21,7 @@ const io = new Server(server);
 io.use(isAuthenticated);
 io.on("connection", (socket) => {
   console.log("a user connected", socket.id, new Date());
+  add_connection(socket);
   socket.join(socket.id);
   diffie_hellman(socket);
   events_emiter(socket);
@@ -27,6 +29,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     console.log("disconnected", socket.id, new Date());
     socket.leave(socket.id);
+    remove_connection(socket);
   });
 });
 
@@ -61,5 +64,7 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     res.status(500).send(err.message);
   }
 });
+
+events_emiter_worker();
 
 export { server };
