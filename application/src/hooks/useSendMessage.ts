@@ -49,8 +49,7 @@ export const UseSendMessage = ({
         encodedText
       );
 
-      const uintArray = new Uint8Array(encryptedData);
-
+      const uintArray = new Uint8Array(encryptedData) as unknown as number[];
       const string = String.fromCharCode.apply(null, uintArray);
 
       const base64Data = btoa(string);
