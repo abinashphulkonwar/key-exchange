@@ -65,6 +65,6 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-events_emiter_worker();
+//events_emiter_worker();
 
 export { server };

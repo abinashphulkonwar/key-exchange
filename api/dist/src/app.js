@@ -65,4 +65,3 @@ app.use((err, req, res, next) => {
         res.status(500).send(err.message);
     }
 });
-(0, events_emiter_1.events_emiter_worker)();
