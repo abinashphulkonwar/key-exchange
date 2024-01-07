@@ -18,6 +18,7 @@ export class Schema<TSchema, TAttrs, TQuery> {
   protected connection: IDBPDatabase<unknown>;
   protected name: string;
   constructor(db: db, isVersionChange: boolean) {
+    console.log("init db", db.name, isVersionChange);
     this.verifyDB(db);
     this.connection = db.connection;
 
@@ -186,5 +187,24 @@ export class Schema<TSchema, TAttrs, TQuery> {
       throw new Error("No autoincrement");
     }
     return true;
+  }
+
+  async remove(query: TQuery) {
+    for (const key in query) {
+      const keyValue = query[key] as IDBValidKey;
+      const isQueryParam = this.checkQueryParams(keyValue);
+      if (!isQueryParam) continue;
+      let id: IDBValidKey | undefined = keyValue;
+      if (key !== "id") {
+        id = await this.connection.getKeyFromIndex(this.name, key, keyValue);
+      }
+      if (!id) continue;
+      this.connection.delete(this.name, id);
+      this.connection.get;
+      console.log("item deleted");
+      return true;
+    }
+
+    return false;
   }
 }
