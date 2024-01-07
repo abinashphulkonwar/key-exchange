@@ -2,34 +2,44 @@ import { IDBPDatabase } from "idb";
 import { Schema } from "./schema";
 const key = "events";
 
+type event_types =
+  | "key"
+  | "init_chat"
+  | "init_chat_inform_about_private_key"
+  | "send_message"
+  | "new_message";
+
 type docdb = {
   id: IDBValidKey;
-  type: "push_message" | "pull_keys";
+  _id: string;
+  type: event_types;
+  data: any;
 };
 
 type docdbQuery = {
-  id?: number;
-  name?: string;
-  reciver_id?: IDBValidKey;
+  _id?: string;
+  id?: IDBValidKey;
+  type?: event_types;
 };
 type Attars = {
-  name: string;
-  reciver_id: IDBValidKey;
+  type: event_types;
+  _id: string;
+  data: any;
 };
 
-export class ventsDB {
+export class eventsDB {
   private static ref: Schema<docdb, Attars, docdbQuery> | null = null;
 
   static async init(
     connection: IDBPDatabase<unknown>,
     isVersionChange: boolean
   ) {
-    if (ventsDB.ref) {
-      console.log("ventsDB already initialized");
+    if (eventsDB.ref) {
+      console.log("eventsDB already initialized");
       return;
     }
-    console.log("init vents db");
-    ventsDB.ref = new Schema(
+    console.log("init events db");
+    eventsDB.ref = new Schema(
       {
         connection: connection,
         name: key,
@@ -37,14 +47,7 @@ export class ventsDB {
         isAutoincrement: true,
         indexs: [
           {
-            field: "name",
-            options: {
-              unique: true,
-            },
-            command: "create",
-          },
-          {
-            field: "reciver_id",
+            field: "_id",
             options: {
               unique: true,
             },
@@ -55,22 +58,45 @@ export class ventsDB {
       isVersionChange
     );
   }
-  static save(data: Attars) {
-    if (!ventsDB.ref) {
-      throw new Error("ventsDB not initialized");
+  static async save(data: Attars) {
+    if (!eventsDB.ref) {
+      throw new Error("eventsDB not initialized");
     }
-    return ventsDB.ref.save(data);
+    return eventsDB.ref.save(data);
   }
   static find() {
-    if (!ventsDB.ref) {
-      throw new Error("ventsDB not initialized");
+    if (!eventsDB.ref) {
+      throw new Error("eventsDB not initialized");
     }
-    return ventsDB.ref.find();
+    return eventsDB.ref.find();
   }
   static findOne(query: docdbQuery) {
-    if (!ventsDB.ref) {
-      throw new Error("ventsDB not initialized");
+    if (!eventsDB.ref) {
+      throw new Error("eventsDB not initialized");
     }
-    return ventsDB.ref.findOne(query);
+    return eventsDB.ref.findOne(query);
+  }
+  private static init_error() {
+    if (!eventsDB.ref) {
+      throw new Error("eventsDB not initialized");
+    }
+  }
+  static async insert_event(query: docdb) {
+    eventsDB.init_error();
+    const id = await eventsDB.save(query);
+    const doc = (await eventsDB.findOne({ id: id })) as docdb;
+    return doc;
+  }
+  static async pull_events() {
+    eventsDB.init_error();
+    const doc = await eventsDB.find();
+    return doc;
+  }
+
+  static async remove_event_by_id(id: IDBValidKey) {
+    eventsDB.init_error();
+    return await eventsDB.ref?.remove({
+      id: id,
+    });
   }
 }
