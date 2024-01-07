@@ -4,9 +4,10 @@ import { messageDB } from "./messages";
 import { chatSessionDB } from "./chat-session";
 import { userDB } from "./user";
 import { ApplicationCrypto } from "../web-crypto";
+import { eventsDB } from "./event";
 
 const database_name = "key-exchanger";
-const database_version = 1;
+const database_version = 4;
 
 export class ApplicationDb {
   private static connection: IDBPDatabase<unknown> | null = null;
@@ -41,6 +42,7 @@ export class ApplicationDb {
     await messageDB.init(database, ApplicationDb.isVersionChange);
     await chatSessionDB.init(database, ApplicationDb.isVersionChange);
     await userDB.init(database, ApplicationDb.isVersionChange);
+    await eventsDB.init(database, ApplicationDb.isVersionChange);
     await ApplicationCrypto.getNewKey();
     await ApplicationCrypto.push_keys();
   }
