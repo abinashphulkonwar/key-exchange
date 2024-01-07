@@ -7,12 +7,15 @@ import { userDB } from "../web-api/Index-db/user";
 import { chatSessionDB } from "../web-api/Index-db/chat-session";
 import { KeyPair } from "../web-api/web-crypto/key-pair";
 import { setUpChat, setupCurrentUserHandler } from "../hooks/useChat";
+import { eventsDB } from "../web-api/Index-db/event";
 
 interface user {
   isLogin: boolean;
   _id: string;
 }
-
+const sleep = (duration: number = 10000) =>
+  new Promise((resolve) => setTimeout(resolve, duration));
+let worker_session_id = "";
 export const WSContext = createContext<{
   socket: Socket | null;
   setUpUser: (user: user) => void;
@@ -97,27 +100,29 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
             other_user_id: string;
             name: string;
           };
+          data: any;
         }) => {
           console.log(event.type);
-          // if (event.type == "key") {
-          //   socket.emit(key_event.client_fetch, {
-          //     userId: event.key.user_fetch_key_user_id,
-          //   });
-          //   const user = await userDB.findOne({
-          //     _id: event.key.user_fetch_key_user_id,
-          //   });
-          //   await KeyDB.findAndUpdate(
-          //     [{ id: event.key.device_key_id }],
-          //     [
-          //       {
-          //         assigned_user__id: event.key.user_fetch_key_user_id,
-          //         assigned_user_id: user?._id,
-          //         status: "assigned",
-          //       },
-          //     ]
-          //   );
-          //   socket.emit(key_event.server_ack, { _id: event.event_id });
-          //
+          /*  if (event.type == "key") {
+            socket.emit(key_event.client_fetch, {
+              userId: event.key.user_fetch_key_user_id,
+            });
+            const user = await userDB.findOne({
+              _id: event.key.user_fetch_key_user_id,
+            });
+            await KeyDB.findAndUpdate(
+              [{ id: event.key.device_key_id }],
+              [
+                {
+                  assigned_user__id: event.key.user_fetch_key_user_id,
+                  assigned_user_id: user?._id,
+                  status: "assigned",
+                },
+              ]
+            );
+            socket.emit(key_event.server_ack, { _id: event.event_id });
+            }
+            */
           if (event.type == "init_chat") {
             await setupCurrentUserHandler(user?._id || "");
             await setUpChat({
@@ -128,6 +133,7 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
               userId: event.init_chat.other_user_id,
               event_id: event.event_id,
             });
+            return;
           }
 
           if (event.type == "init_chat_inform_about_private_key") {
@@ -175,11 +181,48 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
               _id: event.event_id,
               userId: user?._id,
             });
+            return;
           }
+
+          await eventsDB.save({
+            type: event.type,
+            _id: event.event_id,
+            data: event.data,
+          });
         }
       );
+      return () => {
+        socket.close();
+        setSocket(null);
+      };
     } catch (error) {}
   }, [user]);
+
+  const message_processor = async (session: string) => {
+    try {
+      let count = 0;
+      // if (!socket) return;
+      console.log("queue started");
+      while (session == worker_session_id) {
+        count++;
+        console.log("message_processor: ", session, count);
+
+        await sleep(1000);
+      }
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  };
+
+  useEffect(() => {
+    try {
+      worker_session_id = crypto.randomUUID();
+      message_processor(worker_session_id);
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }, [socket]);
+
   const setUpUser = (user: user) => {
     try {
       setupCurrentUserHandler(user._id);
