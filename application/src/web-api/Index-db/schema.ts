@@ -1,4 +1,4 @@
-import { IDBPDatabase, IDBPObjectStore } from "idb";
+import { IDBPDatabase, IDBPObjectStore, IDBPTransaction } from "idb";
 interface db {
   connection: IDBPDatabase<unknown>;
   name: string;
@@ -17,19 +17,20 @@ export interface TCount {
 export class Schema<TSchema, TAttrs, TQuery> {
   protected connection: IDBPDatabase<unknown>;
   protected name: string;
-  constructor(db: db, isVersionChange: boolean) {
+  constructor(
+    db: db,
+    isVersionChange: boolean,
+    transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
+  ) {
     console.log("init db", db.name, isVersionChange);
     this.verifyDB(db);
     this.connection = db.connection;
 
     this.name = db.name;
     if (!isVersionChange) return;
-    let store_ref: IDBPObjectStore<
-      unknown,
-      ArrayLike<string>,
-      string,
-      "versionchange"
-    > | null = null;
+    let store_ref:
+      | IDBPObjectStore<unknown, ArrayLike<string>, string, "versionchange">
+      | undefined = transaction?.objectStore(this.name);
     if (!this.connection.objectStoreNames.contains(db.name)) {
       console.log("creating key store");
 
@@ -38,9 +39,8 @@ export class Schema<TSchema, TAttrs, TQuery> {
         autoIncrement: db.isAutoincrement,
       });
     }
-    console.log("indexed: ", this.name);
-    if (!store_ref)
-      store_ref = this.connection.transaction(db.name, "versionchange").store;
+
+    if (!store_ref) return;
     if (db.indexs && db.indexs.length) {
       db.indexs.forEach((index) => {
         if (store_ref?.indexNames.contains(index.field)) {
@@ -51,6 +51,7 @@ export class Schema<TSchema, TAttrs, TQuery> {
           if (index.command === "recreate") {
             store_ref.deleteIndex(index.field);
           }
+          if (index.command == "create") return;
         }
         if (index.command === "delete") return;
         if (store_ref) {
