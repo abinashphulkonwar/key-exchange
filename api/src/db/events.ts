@@ -20,7 +20,7 @@ type event_types =
   | "init_chat_inform_about_private_key"
   | "pull_message";
 
-interface message {
+export interface message {
   to: mongoose.Schema.Types.ObjectId | string;
   from: mongoose.Schema.Types.ObjectId | string;
   content: string;
