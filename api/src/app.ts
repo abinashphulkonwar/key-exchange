@@ -13,6 +13,7 @@ import { isAuthenticated } from "./handler/auth";
 import { diffie_hellman } from "./handler/diffie-hellman";
 import { events_emiter, events_emiter_worker } from "./handler/events-emiter";
 import { add_connection, remove_connection } from "./handler/connections";
+import { messages_handler } from "./handler/message";
 
 const app = express();
 
@@ -25,6 +26,7 @@ io.on("connection", (socket) => {
   socket.join(socket.id);
   diffie_hellman(socket);
   events_emiter(socket);
+  messages_handler(socket);
 
   socket.on("disconnect", () => {
     console.log("disconnected", socket.id, new Date());

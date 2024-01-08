@@ -10,4 +10,5 @@ export const event_types = {
   c_init_chat: "c-init-chat",
   s_post_new_message: "s-post-new-message",
   c_post_new_message: "c-post-new-message",
+  c_message_delivered_recipts: "c_message_delivered_recipts",
 };
