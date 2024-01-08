@@ -1,9 +1,38 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
+type message_type =
+  | "text"
+  | "image"
+  | "file"
+  | "audio"
+  | "video"
+  | "location"
+  | "contact"
+  | "sticker"
+  | "document"
+  | "poll"
+  | "url";
+
+type event_types =
+  | "key"
+  | "init_chat"
+  | "init_chat_inform_about_private_key"
+  | "pull_message";
+
+interface message {
+  to: mongoose.Schema.Types.ObjectId | string;
+  from: mongoose.Schema.Types.ObjectId | string;
+  content: string;
+  content_type: message_type;
+  command: "add" | "delete";
+  message_id: string;
+  created_at: Date;
+}
+
 interface Attrs {
   userId: mongoose.Schema.Types.ObjectId | string;
-  type: "key" | "init_chat" | "init_chat_inform_about_private_key";
+  type: event_types;
   key?: {
     device_key_id: number;
     other_user: mongoose.Schema.Types.ObjectId | string;
@@ -12,6 +41,7 @@ interface Attrs {
     other_user_id: mongoose.Schema.Types.ObjectId | string;
     name: string;
   };
+  message?: message;
   state: "worker" | "emiter";
   worker_process_count: number;
 }
@@ -22,7 +52,7 @@ interface Doc extends mongoose.Document {
   userId: mongoose.Schema.Types.ObjectId | string;
   createdAt: Date;
   updatedAt: Date;
-  type: "key" | "init_chat" | "init_chat_inform_about_private_key";
+  type: event_types;
   key: {
     device_key_id: number;
     other_user: mongoose.Schema.Types.ObjectId | string;
@@ -31,6 +61,7 @@ interface Doc extends mongoose.Document {
     other_user_id: mongoose.Schema.Types.ObjectId | string;
     name: string;
   };
+  message: message;
   last_process_time: Date;
   state: "worker" | "emiter";
   worker_process_count: number;
@@ -68,6 +99,33 @@ const DocSchema = new Schema(
     },
     init_chat: {
       other_user_id: mongoose.Schema.Types.ObjectId,
+    },
+    message: {
+      to: mongoose.Schema.Types.ObjectId,
+      from: mongoose.Schema.Types.ObjectId,
+      content: String,
+      content_type: {
+        type: String,
+        enum: [
+          "text",
+          "image",
+          "file",
+          "audio",
+          "video",
+          "location",
+          "contact",
+          "sticker",
+          "document",
+          "poll",
+          "url",
+        ],
+      },
+      command: {
+        type: String,
+        enum: ["add", "delete"],
+      },
+      message_id: String,
+      created_at: Date,
     },
     last_process_time: {
       type: Date,
