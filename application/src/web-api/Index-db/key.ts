@@ -1,4 +1,4 @@
-import { IDBPDatabase } from "idb";
+import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema, TCount } from "./schema";
 const key = "key";
 export const keydb_status_assigned = "assigned";
@@ -47,7 +47,8 @@ export class KeyDB {
 
   static async init(
     connection: IDBPDatabase<unknown>,
-    isVersionChange: boolean
+    isVersionChange: boolean,
+    transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
   ) {
     if (KeyDB.ref) {
       console.log("KeyDB already initialized");
@@ -90,7 +91,8 @@ export class KeyDB {
           },
         ],
       },
-      isVersionChange
+      isVersionChange,
+      transaction
     );
   }
   static save(data: keydbAttars) {

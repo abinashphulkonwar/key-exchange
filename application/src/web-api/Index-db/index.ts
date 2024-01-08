@@ -1,4 +1,4 @@
-import { openDB, IDBPDatabase } from "idb";
+import { openDB, IDBPDatabase, IDBPTransaction } from "idb";
 import { KeyDB } from "./key";
 import { messageDB } from "./messages";
 import { chatSessionDB } from "./chat-session";
@@ -7,7 +7,7 @@ import { ApplicationCrypto } from "../web-crypto";
 import { eventsDB } from "./event";
 
 const database_name = "key-exchanger";
-const database_version = 4;
+const database_version = 16;
 
 export class ApplicationDb {
   private static connection: IDBPDatabase<unknown> | null = null;
@@ -16,18 +16,18 @@ export class ApplicationDb {
     console.log("Opening database");
 
     openDB(database_name, database_version, {
-      async upgrade(database) {
+      async upgrade(database, _, __, transaction) {
         ApplicationDb.isVersionChange = true;
-        ApplicationDb.db_init(database);
+        ApplicationDb.db_init(database, transaction);
       },
     }).then((connection) => {
       console.log("Database opened");
       ApplicationDb.connection = connection;
       if (ApplicationDb.isVersionChange) return;
 
-      ApplicationDb.isVersionChange = false;
+      ApplicationDb.isVersionChange = true;
 
-      ApplicationDb.db_init(connection);
+      ApplicationDb.db_init(connection, null);
     });
   }
 
@@ -37,12 +37,21 @@ export class ApplicationDb {
   public static async init() {
     await ApplicationDb.open();
   }
-  private static async db_init(database: IDBPDatabase<unknown>) {
-    await KeyDB.init(database, ApplicationDb.isVersionChange);
-    await messageDB.init(database, ApplicationDb.isVersionChange);
-    await chatSessionDB.init(database, ApplicationDb.isVersionChange);
-    await userDB.init(database, ApplicationDb.isVersionChange);
-    await eventsDB.init(database, ApplicationDb.isVersionChange);
+  private static async db_init(
+    database: IDBPDatabase<unknown>,
+    transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
+  ) {
+    await eventsDB.init(database, ApplicationDb.isVersionChange, transaction);
+
+    await KeyDB.init(database, ApplicationDb.isVersionChange, transaction);
+
+    await messageDB.init(database, ApplicationDb.isVersionChange, transaction);
+    await chatSessionDB.init(
+      database,
+      ApplicationDb.isVersionChange,
+      transaction
+    );
+    await userDB.init(database, ApplicationDb.isVersionChange, transaction);
     await ApplicationCrypto.getNewKey();
     await ApplicationCrypto.push_keys();
   }

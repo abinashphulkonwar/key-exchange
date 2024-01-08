@@ -1,4 +1,4 @@
-import { IDBPDatabase } from "idb";
+import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema } from "./schema";
 const key = "user";
 
@@ -27,7 +27,8 @@ export class userDB {
 
   static async init(
     connection: IDBPDatabase<unknown>,
-    isVersionChange: boolean
+    isVersionChange: boolean,
+    transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
   ) {
     if (userDB.ref) {
       console.log("usersDB already initialized");
@@ -49,7 +50,8 @@ export class userDB {
           },
         ],
       },
-      isVersionChange
+      isVersionChange,
+      transaction
     );
   }
   static save(data: Attars) {

@@ -1,4 +1,4 @@
-import { IDBPDatabase } from "idb";
+import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema } from "./schema";
 const key = "chat-session";
 
@@ -29,7 +29,8 @@ export class chatSessionDB {
 
   static async init(
     connection: IDBPDatabase<unknown>,
-    isVersionChange: boolean
+    isVersionChange: boolean,
+    transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
   ) {
     if (chatSessionDB.ref) {
       console.log("chatSessionDB already initialized");
@@ -58,7 +59,8 @@ export class chatSessionDB {
           },
         ],
       },
-      isVersionChange
+      isVersionChange,
+      transaction
     );
   }
   static save(data: Attars) {

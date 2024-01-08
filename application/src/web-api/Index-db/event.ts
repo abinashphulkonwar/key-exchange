@@ -1,4 +1,4 @@
-import { IDBPDatabase } from "idb";
+import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema } from "./schema";
 const key = "events";
 
@@ -9,22 +9,26 @@ type event_types =
   | "send_message"
   | "new_message";
 
+type event_state = "pending" | "done" | "error";
 type docdb = {
   id: IDBValidKey;
   _id: string;
   type: event_types;
   data: any;
+  state: event_state;
 };
 
 type docdbQuery = {
   _id?: string;
   id?: IDBValidKey;
   type?: event_types;
+  state?: event_state;
 };
 type Attars = {
   type: event_types;
   _id: string;
   data: any;
+  state?: event_state;
 };
 
 export class eventsDB {
@@ -32,7 +36,8 @@ export class eventsDB {
 
   static async init(
     connection: IDBPDatabase<unknown>,
-    isVersionChange: boolean
+    isVersionChange: boolean,
+    transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
   ) {
     if (eventsDB.ref) {
       console.log("eventsDB already initialized");
@@ -53,22 +58,31 @@ export class eventsDB {
             },
             command: "create",
           },
+          {
+            field: "state",
+            options: {
+              unique: false,
+            },
+            command: "create",
+          },
         ],
       },
-      isVersionChange
+      isVersionChange,
+      transaction
     );
   }
   static async save(data: Attars) {
     if (!eventsDB.ref) {
       throw new Error("eventsDB not initialized");
     }
+    if (!data.state) data.state = "pending";
     return eventsDB.ref.save(data);
   }
-  static find() {
+  static find(query: docdbQuery) {
     if (!eventsDB.ref) {
       throw new Error("eventsDB not initialized");
     }
-    return eventsDB.ref.find();
+    return eventsDB.ref.find(query);
   }
   static findOne(query: docdbQuery) {
     if (!eventsDB.ref) {
@@ -89,7 +103,9 @@ export class eventsDB {
   }
   static async pull_events() {
     eventsDB.init_error();
-    const doc = await eventsDB.find();
+    const doc = await eventsDB.find({
+      state: "pending",
+    });
     return doc;
   }
 
