@@ -203,11 +203,13 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
       let count = 0;
       // if (!socket) return;
       console.log("queue started");
+
       while (session == worker_session_id) {
         count++;
-        console.log("message_processor: ", session, count);
+        const events = await eventsDB.pull_events();
+        console.log("events need to be process: ", events, count);
 
-        await sleep(1000);
+        await sleep(25000);
       }
     } catch (err: any) {
       console.log(err.message);
