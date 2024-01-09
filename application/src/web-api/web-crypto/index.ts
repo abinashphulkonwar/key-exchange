@@ -67,4 +67,32 @@ export class ApplicationCrypto {
     );
     console.log("keys are pushed: ", keys.length);
   }
+  static async decripted({
+    content,
+    iv,
+    shared_key,
+  }: {
+    content: string;
+    iv: string;
+    shared_key: CryptoKey;
+  }) {
+    const initializationVector = new TextEncoder().encode(iv);
+
+    const string = atob(content);
+    const uintArray = new Uint8Array(
+      [...string].map((char) => char.charCodeAt(0))
+    );
+    const algorithm = {
+      name: "AES-GCM",
+      iv: initializationVector,
+    };
+    const decryptedData = await window.crypto.subtle.decrypt(
+      algorithm,
+      shared_key,
+      uintArray
+    );
+
+    const text = new TextDecoder().decode(decryptedData);
+    return text;
+  }
 }
