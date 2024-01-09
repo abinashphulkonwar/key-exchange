@@ -2,20 +2,35 @@ import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema } from "./schema";
 const key = "message";
 
+type message_type =
+  | "text"
+  | "image"
+  | "file"
+  | "audio"
+  | "video"
+  | "location"
+  | "contact"
+  | "sticker"
+  | "document"
+  | "poll"
+  | "url";
 export type messageDBdb = {
   id: IDBValidKey;
   session_id: IDBValidKey;
-  created_at: Date;
-  content: string;
-  sender_id: IDBValidKey;
-  reciver_id: IDBValidKey;
   is_read: boolean;
   read_time: Date;
   is_deleted: boolean;
   deleted_time: Date;
-  is_sent: boolean;
   is_deliverd: boolean;
   deliverd_time: Date;
+  to: string;
+  from: string;
+  content: string;
+  content_type: message_type;
+  command: "add" | "delete";
+  message_id: string;
+  created_at: Date;
+  iv: string;
 };
 
 type docdbQuery = {
@@ -34,19 +49,17 @@ type docdbQuery = {
   deliverd_time?: Date;
 };
 export type messageDBAttars = {
-  id?: IDBValidKey;
   session_id: IDBValidKey;
-  created_at: Date;
-  content: string;
-  sender_id: IDBValidKey;
-  reciver_id: IDBValidKey;
-  is_read: boolean;
-  read_time: Date | null;
-  is_deleted: boolean;
-  deleted_time: Date | null;
-  is_sent: boolean;
   is_deliverd: boolean;
   deliverd_time: Date | null;
+  to: string;
+  from: string;
+  content: string;
+  content_type: message_type;
+  command: "add" | "delete";
+  message_id?: string;
+  created_at: Date;
+  iv?: string;
 };
 
 export class messageDB {
@@ -75,17 +88,32 @@ export class messageDB {
             },
             command: "create",
           },
+          {
+            field: "message_id",
+            options: {
+              unique: false,
+            },
+            command: "create",
+          },
         ],
       },
       isVersionChange,
       transaction
     );
   }
-  static save(data: messageDBAttars) {
+  static async save(data: messageDBAttars) {
     if (!messageDB.ref) {
       throw new Error("messageDB not initialized");
     }
-    return messageDB.ref.save(data);
+    data.is_deliverd = false;
+    data.deliverd_time = null;
+    data.created_at = new Date();
+    data.message_id = crypto.randomUUID();
+    data.iv = crypto.randomUUID();
+    const id = await messageDB.ref.save(data);
+    return await messageDB.findOne({
+      id: id,
+    });
   }
   static find(query: docdbQuery) {
     if (!messageDB.ref) {

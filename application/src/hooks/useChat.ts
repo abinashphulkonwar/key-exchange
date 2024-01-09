@@ -64,7 +64,7 @@ export type useChats = ({
   name: string;
   profile: string;
 }) => {
-  save: (message: string) => Promise<void>;
+  save: (message: string) => Promise<messageDBdb>;
   setupCurrentUser: ({ _id }: { _id: string }) => Promise<void>;
   messages: messageDBdb[];
 };
@@ -82,10 +82,14 @@ export const useChats: useChats = ({
     session_id: IDBValidKey;
     sender_id: IDBValidKey;
     reciver_id: IDBValidKey;
+    sender__id: string;
+    reciver__id: string;
   }>({
     session_id: 0,
     sender_id: 0,
     reciver_id: 0,
+    sender__id: "",
+    reciver__id: "",
   });
 
   const getMessages = async () => {
@@ -108,6 +112,8 @@ export const useChats: useChats = ({
       });
       ref.current.reciver_id = chatdb.reciver_id;
       ref.current.session_id = chatdb.id;
+      const reciver_user = await userDB.findOne({ id: chatdb.reciver_id });
+      ref.current.reciver__id = reciver_user?._id || "";
       await getMessages();
     } catch (error) {}
   };
@@ -127,6 +133,7 @@ export const useChats: useChats = ({
     try {
       const user = await setupCurrentUserHandler(_id);
       ref.current.sender_id = user?.id || 0;
+      ref.current.sender__id = user?._id || "";
     } catch (err: any) {
       console.log(err.message);
     }
@@ -143,24 +150,24 @@ export const useChats: useChats = ({
       message
     );
 
-    const key = await messageDB.save({
+    const record = await messageDB.save({
       content: message,
       session_id: ref.current.session_id,
       created_at: time,
-      sender_id: ref.current.session_id,
-      reciver_id: ref.current.reciver_id,
-      is_read: false,
-      read_time: time,
-      is_deleted: false,
-      deleted_time: time,
-      is_sent: false,
+      from: ref.current.sender__id,
+      to: ref.current.reciver__id,
+
       is_deliverd: false,
       deliverd_time: null,
+      content_type: "text",
+      command: "add",
     });
-    const record = await messageDB.findOne({ id: key });
+
     if (record) {
       setMessages((prev) => [...prev, record]);
+      return record;
     }
+    throw new Error("unable to save messages");
   };
 
   return {
