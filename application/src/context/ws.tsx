@@ -1,4 +1,10 @@
-import { ReactElement, createContext, useEffect, useState } from "react";
+import {
+  ReactElement,
+  createContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Socket, io } from "socket.io-client";
 import { key_event } from "./events-type";
@@ -32,18 +38,18 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
     isLogin: false,
     _id: "",
   });
+  const ref = useRef({
+    isInitial: true,
+  });
   useEffect(() => {
     try {
-      if (user?._id || user?.isLogin) return;
+      if (!ref.current.isInitial) return;
       const socket = io("http://localhost:3001/", {
         transports: ["websocket"],
         reconnection: true,
-        auth: {
-          _id: user?._id,
-        },
       });
       setSocket(socket);
-
+      ref.current.isInitial = false;
       socket.on("connect", () => {
         console.log("connected");
       });
@@ -192,8 +198,10 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
         }
       );
       return () => {
-        socket.close();
-        setSocket(null);
+        if (ref.current.isInitial) {
+          socket.close();
+          setSocket(null);
+        }
       };
     } catch (error) {}
   }, [user]);
@@ -231,6 +239,8 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
       setUser({ isLogin: user.isLogin, _id: user._id });
     } catch (error) {}
   };
+
+  console.log(socket);
   return (
     <WSContext.Provider value={{ socket: socket, setUpUser: setUpUser }}>
       {children}
