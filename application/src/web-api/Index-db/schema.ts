@@ -30,7 +30,7 @@ export class Schema<TSchema, TAttrs, TQuery> {
     if (!isVersionChange) return;
     let store_ref:
       | IDBPObjectStore<unknown, ArrayLike<string>, string, "versionchange">
-      | undefined = transaction?.objectStore(this.name);
+      | undefined = undefined;
     if (!this.connection.objectStoreNames.contains(db.name)) {
       console.log("creating key store");
 
@@ -38,6 +38,8 @@ export class Schema<TSchema, TAttrs, TQuery> {
         keyPath: db.indexKey,
         autoIncrement: db.isAutoincrement,
       });
+    } else {
+      store_ref = transaction?.objectStore(this.name);
     }
 
     if (!store_ref) return;
