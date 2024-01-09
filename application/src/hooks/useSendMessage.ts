@@ -3,6 +3,7 @@ import { WSContext } from "../context/ws";
 import { chatSessionDB } from "../web-api/Index-db/chat-session";
 import { key_event } from "../context/events-type";
 import { userDB } from "../web-api/Index-db/user";
+import { messageDBdb } from "../web-api/Index-db/messages";
 
 export const UseSendMessage = ({
   _id,
@@ -16,6 +17,8 @@ export const UseSendMessage = ({
     shared_key: null,
   });
   const { socket } = useContext(WSContext);
+
+  console.log(socket, ref);
   const init = async () => {
     try {
       if (!socket || !_id) return;
@@ -35,15 +38,17 @@ export const UseSendMessage = ({
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = async (message: messageDBdb) => {
     try {
+      console.log(key_event.s_post_new_message, socket, ref.current.shared_key);
       if (!socket || !ref.current.shared_key) return;
+
       console.log("s-send-message: ", _id);
-      const encodedText = new TextEncoder().encode("🚀");
+      const encodedText = new TextEncoder().encode(message.content);
       const encryptedData = await window.crypto.subtle.encrypt(
         {
           name: "AES-GCM",
-          iv: new TextEncoder().encode("Initialization Vector"),
+          iv: new TextEncoder().encode(message.iv),
         },
         ref.current.shared_key,
         encodedText
@@ -53,7 +58,9 @@ export const UseSendMessage = ({
       const string = String.fromCharCode.apply(null, uintArray);
 
       const base64Data = btoa(string);
-      console.log(base64Data);
+      message.content = base64Data;
+      console.log(message);
+      socket.emit(key_event.s_post_new_message, message);
     } catch (err: any) {
       console.log(err.message);
     }

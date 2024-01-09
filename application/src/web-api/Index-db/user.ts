@@ -9,7 +9,7 @@ type docdb = {
   profile: string;
 };
 type docdbQuery = {
-  id?: number;
+  id?: IDBValidKey;
   _id?: string;
   name?: string;
   profile?: string;

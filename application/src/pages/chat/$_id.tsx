@@ -78,9 +78,9 @@ export const Index = () => {
 
   const onSendHandler = async () => {
     try {
-      //   await useChat.save(message);
+      const record = await useChat.save(message);
       setMessage("");
-      await useMessage.decriptMessage();
+      await useMessage.sendMessage(record);
     } catch (err: any) {
       console.log(err.message);
     }
