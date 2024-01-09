@@ -18,7 +18,6 @@ export const UseSendMessage = ({
   });
   const { socket } = useContext(WSContext);
 
-  console.log(socket, ref);
   const init = async () => {
     try {
       if (!socket || !_id) return;

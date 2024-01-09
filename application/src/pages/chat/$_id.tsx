@@ -99,7 +99,15 @@ export const Index = () => {
         <Box flex={1} paddingY={10} overflowY={"scroll"}>
           <Box>
             {useChat.messages.map((message) => {
-              return <Text key={message.id.toString()}>{message.content}</Text>;
+              return (
+                <div key={message.id.toString()}>
+                  <Text display={"inline"} fontSize="large" fontWeight="500">
+                    {message.from == user._id ? "you" : useChat.reciver?.name}{" "}
+                  </Text>
+
+                  <Text display={"inline"}>{message.content}</Text>
+                </div>
+              );
             })}
           </Box>
         </Box>
