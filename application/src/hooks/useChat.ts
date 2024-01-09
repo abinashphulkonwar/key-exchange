@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { chatSessionDB, docdb } from "../web-api/Index-db/chat-session";
 import { messageDB, messageDBdb } from "../web-api/Index-db/messages";
-import { userDB } from "../web-api/Index-db/user";
+import { docdbUser, userDB } from "../web-api/Index-db/user";
 export const setupCurrentUserHandler = async (_id: string) => {
   if (!_id) return;
   const user = await userDB.findOne({
@@ -67,6 +67,7 @@ export type useChats = ({
   save: (message: string) => Promise<messageDBdb>;
   setupCurrentUser: ({ _id }: { _id: string }) => Promise<void>;
   messages: messageDBdb[];
+  reciver: docdbUser;
 };
 export const useChats: useChats = ({
   _id,
@@ -78,6 +79,12 @@ export const useChats: useChats = ({
   profile: string;
 }) => {
   const [messages, setMessages] = useState<messageDBdb[]>([]);
+  const [reciver, setReciver] = useState<docdbUser>({
+    name: "",
+    id: 0,
+    _id: "",
+    profile: "",
+  });
   const ref = useRef<{
     session_id: IDBValidKey;
     sender_id: IDBValidKey;
@@ -112,8 +119,11 @@ export const useChats: useChats = ({
       });
       ref.current.reciver_id = chatdb.reciver_id;
       ref.current.session_id = chatdb.id;
-      const reciver_user = await userDB.findOne({ id: chatdb.reciver_id });
+      const reciver_user = (await userDB.findOne({
+        id: chatdb.reciver_id,
+      })) as docdbUser;
       ref.current.reciver__id = reciver_user?._id || "";
+      setReciver(reciver_user);
       await getMessages();
     } catch (error) {}
   };
@@ -174,5 +184,6 @@ export const useChats: useChats = ({
     save,
     setupCurrentUser,
     messages,
+    reciver,
   };
 };
