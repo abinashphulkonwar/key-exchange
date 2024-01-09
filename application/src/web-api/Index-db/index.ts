@@ -7,7 +7,7 @@ import { ApplicationCrypto } from "../web-crypto";
 import { eventsDB } from "./event";
 
 const database_name = "key-exchanger";
-const database_version = 16;
+const database_version = 22;
 
 export class ApplicationDb {
   private static connection: IDBPDatabase<unknown> | null = null;
@@ -25,7 +25,7 @@ export class ApplicationDb {
       ApplicationDb.connection = connection;
       if (ApplicationDb.isVersionChange) return;
 
-      ApplicationDb.isVersionChange = true;
+      ApplicationDb.isVersionChange = false;
 
       ApplicationDb.db_init(connection, null);
     });
@@ -46,12 +46,13 @@ export class ApplicationDb {
     await KeyDB.init(database, ApplicationDb.isVersionChange, transaction);
 
     await messageDB.init(database, ApplicationDb.isVersionChange, transaction);
+    await userDB.init(database, ApplicationDb.isVersionChange, transaction);
+
     await chatSessionDB.init(
       database,
       ApplicationDb.isVersionChange,
       transaction
     );
-    await userDB.init(database, ApplicationDb.isVersionChange, transaction);
     await ApplicationCrypto.getNewKey();
     await ApplicationCrypto.push_keys();
   }
