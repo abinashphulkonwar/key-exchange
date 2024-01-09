@@ -13,7 +13,9 @@ import { userDB } from "../web-api/Index-db/user";
 import { chatSessionDB } from "../web-api/Index-db/chat-session";
 import { KeyPair } from "../web-api/web-crypto/key-pair";
 import { setUpChat, setupCurrentUserHandler } from "../hooks/useChat";
-import { eventsDB } from "../web-api/Index-db/event";
+import { eventsDB, message_event } from "../web-api/Index-db/event";
+import { messageDB } from "../web-api/Index-db/messages";
+import { ApplicationCrypto } from "../web-api/web-crypto";
 
 interface user {
   isLogin: boolean;
@@ -108,7 +110,7 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
           };
           data: any;
         }) => {
-          console.log(event.type);
+          console.log(event.type, event);
           /*  if (event.type == "key") {
             socket.emit(key_event.client_fetch, {
               userId: event.key.user_fetch_key_user_id,
@@ -189,7 +191,37 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
             });
             return;
           }
-
+          const isExist = await eventsDB.findOne({
+            _id: event.event_id,
+          });
+          if (isExist) return;
+          await eventsDB.save({
+            type: event.type,
+            _id: event.event_id,
+            data: event.data,
+          });
+        }
+      );
+      socket.on(
+        key_event.c_post_new_message,
+        async (event: {
+          type: "key" | "init_chat" | "init_chat_inform_about_private_key";
+          key: {
+            device_key_id: number;
+            other_user: string;
+          };
+          event_id: string;
+          init_chat: {
+            other_user_id: string;
+            name: string;
+          };
+          data: any;
+        }) => {
+          console.log(event.type, key_event.c_post_new_message);
+          const isExist = await eventsDB.findOne({
+            _id: event.event_id,
+          });
+          if (isExist) return;
           await eventsDB.save({
             type: event.type,
             _id: event.event_id,
@@ -215,8 +247,52 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
       while (session == worker_session_id) {
         count++;
         const events = await eventsDB.pull_events();
-        console.log("events need to be process: ", events, count);
 
+        if (!events) {
+          await sleep(25000);
+          continue;
+        }
+
+        if (events.length) {
+          for (const event of events) {
+            if (event.type == "pull_message") {
+              const message = event.data as message_event;
+              const chating_user = await userDB.findOne({
+                _id: message.from,
+              });
+              const chat_session = await chatSessionDB.findOne({
+                reciver_id: chating_user?.id,
+              });
+              if (!chat_session) continue;
+              const content = await ApplicationCrypto.decripted({
+                iv: message.iv,
+                content: message.content,
+                shared_key: chat_session.shared_key,
+              });
+              await messageDB.save(
+                {
+                  session_id: chat_session.id,
+                  is_deliverd: true,
+                  deliverd_time: message.created_at,
+                  to: message.to,
+                  from: message.from,
+                  content: content,
+                  content_type: message.content_type,
+                  command: "add",
+                  created_at: message.created_at,
+                  iv: message.iv,
+                },
+                true
+              );
+              socket?.emit(key_event.server_ack, {
+                _id: event._id,
+              });
+              await eventsDB.remove_event_by_id(event.id);
+            }
+            //  socket?.emit(key_event.client, event);
+          }
+        }
+        console.log("events need to be process: ", events, count);
         await sleep(25000);
       }
     } catch (err: any) {
