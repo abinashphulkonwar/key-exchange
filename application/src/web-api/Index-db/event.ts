@@ -1,20 +1,33 @@
 import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema } from "./schema";
+import { message_type } from "./messages";
 const key = "events";
+
+export interface message_event {
+  to: string;
+  from: string;
+  content: string;
+  content_type: message_type;
+  command: "add" | "delete";
+  message_id: string;
+  created_at: Date;
+  iv: string;
+}
 
 type event_types =
   | "key"
   | "init_chat"
   | "init_chat_inform_about_private_key"
   | "send_message"
-  | "new_message";
+  | "new_message"
+  | "pull_message";
 
 type event_state = "pending" | "done" | "error";
 type docdb = {
   id: IDBValidKey;
   _id: string;
   type: event_types;
-  data: any;
+  data: message_event | any;
   state: event_state;
 };
 
