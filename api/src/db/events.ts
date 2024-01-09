@@ -28,6 +28,7 @@ export interface message {
   command: "add" | "delete";
   message_id: string;
   created_at: Date;
+  iv: string;
 }
 
 interface Attrs {
@@ -91,6 +92,7 @@ const DocSchema = new Schema(
         "deleted",
         "pushed",
         "send",
+        "pull_message",
       ],
     },
     key: {
@@ -126,6 +128,7 @@ const DocSchema = new Schema(
       },
       message_id: String,
       created_at: Date,
+      iv: String,
     },
     last_process_time: {
       type: Date,

@@ -13,9 +13,7 @@ export const messages_handler = (socket: Socket) => {
         worker_process_count: 3,
         message: data,
       });
-
       await event.save();
-
       socket.emit(event_types.c_message_delivered_recipts, {
         status: "ok",
         delivered_at: event.createdAt,
