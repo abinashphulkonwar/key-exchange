@@ -2,7 +2,7 @@ import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema } from "./schema";
 const key = "message";
 
-type message_type =
+export type message_type =
   | "text"
   | "image"
   | "file"
@@ -101,15 +101,19 @@ export class messageDB {
       transaction
     );
   }
-  static async save(data: messageDBAttars) {
+  static async save(data: messageDBAttars, is_pull_event = false) {
     if (!messageDB.ref) {
       throw new Error("messageDB not initialized");
     }
-    data.is_deliverd = false;
-    data.deliverd_time = null;
-    data.created_at = new Date();
-    data.message_id = crypto.randomUUID();
-    data.iv = crypto.randomUUID();
+    if (!is_pull_event) {
+      data.is_deliverd = false;
+      data.deliverd_time = null;
+      data.created_at = new Date();
+      data.message_id = crypto.randomUUID();
+      data.iv = crypto.randomUUID();
+    } else {
+      data.iv = "";
+    }
     const id = await messageDB.ref.save(data);
     return await messageDB.findOne({
       id: id,
