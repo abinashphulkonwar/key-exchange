@@ -2,7 +2,7 @@ import { IDBPDatabase, IDBPTransaction } from "idb";
 import { Schema } from "./schema";
 const key = "user";
 
-type docdb = {
+export type docdbUser = {
   id: IDBValidKey;
   _id: string;
   name: string;
@@ -23,7 +23,7 @@ type Attars = {
 };
 
 export class userDB {
-  private static ref: Schema<docdb, Attars, docdbQuery> | null = null;
+  private static ref: Schema<docdbUser, Attars, docdbQuery> | null = null;
 
   static async init(
     connection: IDBPDatabase<unknown>,
