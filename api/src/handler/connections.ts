@@ -47,6 +47,9 @@ export class Connections {
     if (node.connections.length == 0) delete this.root[connection.user._id];
     this.count--;
   }
+  get(userId: string) {
+    return this.root[userId]?.connections || [];
+  }
 }
 
 export const ConnectionsTree = new Connections();

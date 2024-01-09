@@ -9,8 +9,8 @@ export const messages_handler = (socket: Socket) => {
       const event = Events.build({
         userId: data.to,
         type: "pull_message",
-        state: "emiter",
-        worker_process_count: 3,
+        state: "worker",
+        worker_process_count: 0,
         message: data,
       });
       await event.save();
