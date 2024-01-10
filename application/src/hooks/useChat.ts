@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { chatSessionDB, docdb } from "../web-api/Index-db/chat-session";
 import { messageDB, messageDBdb } from "../web-api/Index-db/messages";
 import { docdbUser, userDB } from "../web-api/Index-db/user";
+import { listen_event, remove_listener } from "../context/message-event";
 export const setupCurrentUserHandler = async (_id: string) => {
   if (!_id) return;
   const user = await userDB.findOne({
@@ -138,6 +139,19 @@ export const useChats: useChats = ({
       console.log(err.message);
     }
   }, [_id]);
+  useEffect(() => {
+    try {
+      const handler = (e: CustomEvent<messageDBdb>) => {
+        setMessages((prev) => [...prev, e.detail]);
+      };
+      listen_event(handler);
+      return () => {
+        remove_listener(handler);
+      };
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }, []);
 
   const setupCurrentUser = async ({ _id }: { _id: string }) => {
     try {

@@ -16,6 +16,7 @@ import { setUpChat, setupCurrentUserHandler } from "../hooks/useChat";
 import { eventsDB, message_event } from "../web-api/Index-db/event";
 import { messageDB } from "../web-api/Index-db/messages";
 import { ApplicationCrypto } from "../web-api/web-crypto";
+import { dispatch_event } from "./message-event";
 
 interface user {
   isLogin: boolean;
@@ -241,6 +242,7 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
   const message_processor = async (session: string) => {
     try {
       let count = 0;
+      let iter = 1;
       // if (!socket) return;
       console.log("queue started");
 
@@ -248,52 +250,59 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
         count++;
         const events = await eventsDB.pull_events();
 
-        if (!events) {
-          await sleep(25000);
+        if (!events || !events.length) {
+          console.log("events: ", iter, count);
+          await sleep(500 * iter);
+          if (iter == 10) {
+            iter = 1;
+          } else {
+            iter++;
+          }
           continue;
         }
 
-        if (events.length) {
-          for (const event of events) {
-            if (event.type == "pull_message") {
-              const message = event.data as message_event;
-              const chating_user = await userDB.findOne({
-                _id: message.from,
-              });
-              const chat_session = await chatSessionDB.findOne({
-                reciver_id: chating_user?.id,
-              });
-              if (!chat_session) continue;
-              const content = await ApplicationCrypto.decripted({
+        for (const event of events) {
+          if (event.type == "pull_message") {
+            const message = event.data as message_event;
+            const chating_user = await userDB.findOne({
+              _id: message.from,
+            });
+            const chat_session = await chatSessionDB.findOne({
+              reciver_id: chating_user?.id,
+            });
+            if (!chat_session) continue;
+            const content = await ApplicationCrypto.decripted({
+              iv: message.iv,
+              content: message.content,
+              shared_key: chat_session.shared_key,
+            });
+            const new_message = await messageDB.save(
+              {
+                session_id: chat_session.id,
+                is_deliverd: true,
+                deliverd_time: message.created_at,
+                to: message.to,
+                from: message.from,
+                content: content,
+                content_type: message.content_type,
+                command: "add",
+                created_at: message.created_at,
                 iv: message.iv,
-                content: message.content,
-                shared_key: chat_session.shared_key,
-              });
-              await messageDB.save(
-                {
-                  session_id: chat_session.id,
-                  is_deliverd: true,
-                  deliverd_time: message.created_at,
-                  to: message.to,
-                  from: message.from,
-                  content: content,
-                  content_type: message.content_type,
-                  command: "add",
-                  created_at: message.created_at,
-                  iv: message.iv,
-                },
-                true
-              );
-              socket?.emit(key_event.server_ack, {
-                _id: event._id,
-              });
-              await eventsDB.remove_event_by_id(event.id);
+              },
+              true
+            );
+            if (new_message) {
+              dispatch_event(new_message);
             }
-            //  socket?.emit(key_event.client, event);
+            socket?.emit(key_event.server_ack, {
+              _id: event._id,
+            });
+            await eventsDB.remove_event_by_id(event.id);
           }
         }
         console.log("events need to be process: ", events, count);
-        await sleep(25000);
+        await sleep(20);
+        iter = 1;
       }
     } catch (err: any) {
       console.log(err.message);
@@ -316,7 +325,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
     } catch (error) {}
   };
 
-  console.log(socket);
   return (
     <WSContext.Provider value={{ socket: socket, setUpUser: setUpUser }}>
       {children}
