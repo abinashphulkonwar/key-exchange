@@ -21,7 +21,7 @@ export const Loader = async ({ request }: { request: Request }) => {
 };
 
 export const Index = () => {
-  const [message, setMessage] = useState<string>("");
+  const [input_message, setInputMessage] = useState<string>("");
   const params = useParams<{ _id: string }>();
   const { state } = useLocation() as {
     state: {
@@ -73,14 +73,17 @@ export const Index = () => {
   }, [params._id]);
 
   const onMessageHandler = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setMessage(e.target.value);
+    console.log("input");
+    setInputMessage(e.target.value);
   };
 
   const onSendHandler = async () => {
     try {
-      const record = await useChat.save(message);
-      setMessage("");
+      const record = await useChat.save(input_message);
+      console.log("record: ", record);
       await useMessage.sendMessage(record);
+
+      setInputMessage("");
     } catch (err: any) {
       console.log(err.message);
     }
@@ -98,7 +101,7 @@ export const Index = () => {
         </Box>
         <Box flex={1} paddingY={10} overflowY={"scroll"}>
           <Box>
-            {useChat.messages.map((message) => {
+            {useChat.list_messages.map((message) => {
               return (
                 <div key={message.id.toString()}>
                   <Text display={"inline"} fontSize="large" fontWeight="500">
@@ -118,7 +121,7 @@ export const Index = () => {
               placeholder="Here is a sample placeholder"
               size="sm"
               resize={"none"}
-              value={message}
+              value={input_message}
               onChange={onMessageHandler}
             />
             <Box h={"100%"} w={5} />

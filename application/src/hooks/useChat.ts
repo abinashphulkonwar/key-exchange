@@ -67,7 +67,7 @@ export type useChats = ({
 }) => {
   save: (message: string) => Promise<messageDBdb>;
   setupCurrentUser: ({ _id }: { _id: string }) => Promise<void>;
-  messages: messageDBdb[];
+  list_messages: messageDBdb[];
   reciver: docdbUser;
 };
 export const useChats: useChats = ({
@@ -180,7 +180,6 @@ export const useChats: useChats = ({
       created_at: time,
       from: ref.current.sender__id,
       to: ref.current.reciver__id,
-
       is_deliverd: false,
       deliverd_time: null,
       content_type: "text",
@@ -188,7 +187,7 @@ export const useChats: useChats = ({
     });
 
     if (record) {
-      setMessages((prev) => [...prev, record]);
+      setMessages((prev) => [...prev, { ...record }]);
       return record;
     }
     throw new Error("unable to save messages");
@@ -197,7 +196,7 @@ export const useChats: useChats = ({
   return {
     save,
     setupCurrentUser,
-    messages,
+    list_messages: messages,
     reciver,
   };
 };

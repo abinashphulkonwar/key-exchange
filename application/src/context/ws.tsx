@@ -251,7 +251,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
         const events = await eventsDB.pull_events();
 
         if (!events || !events.length) {
-          console.log("events: ", iter, count);
           await sleep(500 * iter);
           if (iter == 10) {
             iter = 1;
@@ -292,6 +291,7 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
               true
             );
             if (new_message) {
+              console.log(new_message);
               dispatch_event(new_message);
             }
             socket?.emit(key_event.server_ack, {
