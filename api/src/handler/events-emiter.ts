@@ -43,9 +43,9 @@ export const events_emiter = async (socket: Socket) => {
 
   await emite_event(socket);
 };
-
 export const events_emiter_worker = async () => {
   try {
+    let iter = 1;
     while (true) {
       let last_process_time = new Date();
       const event = await Events.findOne({
@@ -57,14 +57,19 @@ export const events_emiter_worker = async () => {
           $lt: 3,
         },
       });
+
+      if (!event) {
+        await sleep(500 * iter);
+        if (iter == 5) {
+          iter = 1;
+        }
+        iter++;
+        continue;
+      }
       console.log("event: ", event, last_process_time);
       last_process_time = new Date();
       last_process_time.setSeconds(last_process_time.getSeconds() + 25);
-      if (!event) {
-        await sleep(10000);
-        continue;
-      }
-      console.log("event process: ", event._id);
+
       const query: {
         last_process_time?: Date;
         state?: string;
@@ -94,8 +99,7 @@ export const events_emiter_worker = async () => {
         });
       });
       await Events.findByIdAndUpdate(event._id, query);
-
-      await sleep(1000);
+      iter = 1;
     }
   } catch (err: any) {
     console.log(err.message);
