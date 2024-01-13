@@ -13,10 +13,9 @@ import { userDB } from "../web-api/Index-db/user";
 import { chatSessionDB } from "../web-api/Index-db/chat-session";
 import { KeyPair } from "../web-api/web-crypto/key-pair";
 import { setUpChat, setupCurrentUserHandler } from "../hooks/useChat";
-import { eventsDB, message_event } from "../web-api/Index-db/event";
-import { messageDB } from "../web-api/Index-db/messages";
-import { ApplicationCrypto } from "../web-api/web-crypto";
-import { dispatch_event } from "./message-event";
+import { eventsDB } from "../web-api/Index-db/event";
+
+import { UseEvent } from "./event-hook";
 
 interface user {
   isLogin: boolean;
@@ -41,6 +40,7 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
     isLogin: false,
     _id: "",
   });
+  const useEvent = UseEvent({ socket: socket });
   const ref = useRef({
     isInitial: true,
   });
@@ -261,44 +261,8 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
         }
 
         for (const event of events) {
-          if (event.type == "pull_message") {
-            const message = event.data as message_event;
-            const chating_user = await userDB.findOne({
-              _id: message.from,
-            });
-            const chat_session = await chatSessionDB.findOne({
-              reciver_id: chating_user?.id,
-            });
-            if (!chat_session) continue;
-            const content = await ApplicationCrypto.decripted({
-              iv: message.iv,
-              content: message.content,
-              shared_key: chat_session.shared_key,
-            });
-            const new_message = await messageDB.save(
-              {
-                session_id: chat_session.id,
-                is_deliverd: true,
-                deliverd_time: message.created_at,
-                to: message.to,
-                from: message.from,
-                content: content,
-                content_type: message.content_type,
-                command: "add",
-                created_at: message.created_at,
-                iv: message.iv,
-              },
-              true
-            );
-            if (new_message) {
-              console.log(new_message);
-              dispatch_event(new_message);
-            }
-            socket?.emit(key_event.server_ack, {
-              _id: event._id,
-            });
-            await eventsDB.remove_event_by_id(event.id);
-          }
+          const status = await useEvent.handler(event);
+          if (!status) continue;
         }
         console.log("events need to be process: ", events, count);
         await sleep(20);
