@@ -11,4 +11,6 @@ export const event_types = {
   s_post_new_message: "s-post-new-message",
   c_post_new_message: "c-post-new-message",
   c_message_delivered_recipts: "c_message_delivered_recipts",
+  s_post_message_recipts: "s-post-message-recipts",
+  c_post_message_recipts: "c-post-message-recipts",
 };
