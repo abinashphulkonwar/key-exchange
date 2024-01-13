@@ -18,7 +18,9 @@ type event_types =
   | "key"
   | "init_chat"
   | "init_chat_inform_about_private_key"
-  | "pull_message";
+  | "pull_message"
+  | "send_recipts"
+  | "get_recipts";
 
 export interface message {
   to: mongoose.Schema.Types.ObjectId | string;
@@ -29,6 +31,15 @@ export interface message {
   message_id: string;
   created_at: Date;
   iv: string;
+}
+
+interface Recipts {
+  from: mongoose.Schema.Types.ObjectId | string;
+  to: mongoose.Schema.Types.ObjectId | string;
+  message_id: number;
+  command: "read" | "deliverd" | "ack";
+  time: Date;
+  event_id: number;
 }
 
 interface Attrs {
@@ -43,6 +54,8 @@ interface Attrs {
     name: string;
   };
   message?: message;
+  recipts?: Recipts;
+
   state: "worker" | "emiter";
   worker_process_count: number;
 }
@@ -63,6 +76,7 @@ interface Doc extends mongoose.Document {
     name: string;
   };
   message: message;
+  recipts: Recipts;
   last_process_time: Date;
   state: "worker" | "emiter";
   worker_process_count: number;
@@ -93,6 +107,8 @@ const DocSchema = new Schema(
         "pushed",
         "send",
         "pull_message",
+        "send_recipts",
+        "get_recipts",
       ],
     },
     key: {
@@ -129,6 +145,19 @@ const DocSchema = new Schema(
       message_id: String,
       created_at: Date,
       iv: String,
+    },
+    recipts: {
+      from: mongoose.Schema.Types.ObjectId,
+      to: mongoose.Schema.Types.ObjectId,
+      message_id: Number,
+      command: {
+        type: String,
+        enum: ["read", "deliverd", "ack"],
+      },
+      time: {
+        type: Date,
+      },
+      event_id: Number,
     },
     last_process_time: {
       type: Date,
