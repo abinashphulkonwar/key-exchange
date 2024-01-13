@@ -9,9 +9,17 @@ export interface message_event {
   content: string;
   content_type: message_type;
   command: "add" | "delete";
-  message_id: string;
+  message_id: IDBValidKey;
   created_at: Date;
   iv: string;
+}
+
+export interface message_recipts_event {
+  to: string;
+  message_id: string;
+  command: "read" | "deliverd" | "ack";
+  time: Date;
+  event_id: number;
 }
 
 type event_types =
@@ -20,16 +28,20 @@ type event_types =
   | "init_chat_inform_about_private_key"
   | "send_message"
   | "new_message"
-  | "pull_message";
+  | "pull_message"
+  | "send_recipts"
+  | "get_recipts"
+  | "send_recipts_ack"
+  | "get_recipts_ack";
 
 type event_state = "pending" | "done" | "error";
-type docdb = {
+export interface interfaceEventsDB {
   id: IDBValidKey;
   _id: string;
   type: event_types;
-  data: message_event | any;
+  data: message_event | message_recipts_event | any;
   state: event_state;
-};
+}
 
 type docdbQuery = {
   _id?: string;
@@ -45,7 +57,8 @@ type Attars = {
 };
 
 export class eventsDB {
-  private static ref: Schema<docdb, Attars, docdbQuery> | null = null;
+  private static ref: Schema<interfaceEventsDB, Attars, docdbQuery> | null =
+    null;
 
   static async init(
     connection: IDBPDatabase<unknown>,
@@ -108,10 +121,10 @@ export class eventsDB {
       throw new Error("eventsDB not initialized");
     }
   }
-  static async insert_event(query: docdb) {
+  static async insert_event(query: interfaceEventsDB) {
     eventsDB.init_error();
     const id = await eventsDB.save(query);
-    const doc = (await eventsDB.findOne({ id: id })) as docdb;
+    const doc = (await eventsDB.findOne({ id: id })) as interfaceEventsDB;
     return doc;
   }
   static async pull_events() {
