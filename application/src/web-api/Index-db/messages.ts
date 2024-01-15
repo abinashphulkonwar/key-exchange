@@ -18,6 +18,7 @@ export type messageDBdb = {
   id: IDBValidKey;
   session_id: IDBValidKey;
   is_read: boolean;
+  is_read_event_created: boolean;
   read_time: Date;
   is_deleted: boolean;
   deleted_time: Date;
@@ -40,6 +41,7 @@ type docdbQuery = {
   content?: string;
   sender_id?: IDBValidKey;
   reciver_id?: IDBValidKey;
+  is_read_event_created?: boolean;
   is_read?: boolean;
   read_time?: Date;
   is_deleted?: boolean;
@@ -60,6 +62,7 @@ export type messageDBAttars = {
   message_id?: string;
   created_at: Date;
   iv?: string;
+  is_read_event_created?: boolean;
 };
 
 export class messageDB {
@@ -143,5 +146,11 @@ export class messageDB {
       throw new Error("chatSessionDB not initialized");
     }
     return messageDB.ref.findAndUpdate(query, data);
+  }
+  static findByIdAndUpdate(query: messageDBdb["id"], data: docdbQuery) {
+    if (!messageDB.ref) {
+      throw new Error("chatSessionDB not initialized");
+    }
+    return messageDB.ref.findByIdAndUpdate(query, data);
   }
 }
