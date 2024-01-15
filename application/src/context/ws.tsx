@@ -16,6 +16,7 @@ import { setUpChat, setupCurrentUserHandler } from "../hooks/useChat";
 import { eventsDB } from "../web-api/Index-db/event";
 
 import { UseEvent } from "./event-hook";
+import { processedEventsDB } from "../web-api/Index-db/processed-events";
 
 interface user {
   isLogin: boolean;
@@ -112,6 +113,10 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
           data: any;
         }) => {
           console.log(event.type, event);
+          const isAlreadyProcessed = await processedEventsDB.findOne({
+            _id: event.event_id,
+          });
+          if (isAlreadyProcessed) return;
           /*  if (event.type == "key") {
             socket.emit(key_event.client_fetch, {
               userId: event.key.user_fetch_key_user_id,
