@@ -34,7 +34,12 @@ type event_types =
   | "send_recipts_ack"
   | "get_recipts_ack";
 
-type event_state = "pending" | "done" | "error";
+type push_event_id = `not-processed:${string}`;
+
+export const pushedEventId = (id: IDBValidKey): push_event_id =>
+  `not-processed:${id}`;
+
+type event_state = "pending" | "done" | "error" | "push";
 export interface interfaceEventsDB {
   id: IDBValidKey;
   _id: string;
@@ -52,7 +57,7 @@ type docdbQuery = {
 type Attars = {
   type: event_types;
   _id: string;
-  data: any;
+  data: message_event | message_recipts_event | any;
   state?: event_state;
 };
 
