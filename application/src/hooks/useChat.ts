@@ -3,6 +3,7 @@ import { chatSessionDB, docdb } from "../web-api/Index-db/chat-session";
 import { messageDB, messageDBdb } from "../web-api/Index-db/messages";
 import { docdbUser, userDB } from "../web-api/Index-db/user";
 import { listen_event, remove_listener } from "../context/message-event";
+import { eventsDB, pushedEventId } from "../web-api/Index-db/event";
 export const setupCurrentUserHandler = async (_id: string) => {
   if (!_id) return;
   const user = await userDB.findOne({
@@ -92,13 +93,66 @@ export const useChats: useChats = ({
     reciver_id: IDBValidKey;
     sender__id: string;
     reciver__id: string;
+    isReadProcessing: boolean;
   }>({
     session_id: 0,
     sender_id: 0,
     reciver_id: 0,
     sender__id: "",
     reciver__id: "",
+    isReadProcessing: false,
   });
+
+  const markedAsRead = async () => {
+    try {
+      ref.current.isReadProcessing = true;
+      let isChangeHapped = false;
+      const new_messages: messageDBdb[] = [];
+      for (const message of messages) {
+        if (message.is_read_event_created || message.is_read) {
+          new_messages.push(message);
+          continue;
+        }
+        console.log(pushedEventId(message.id));
+        await eventsDB.save({
+          state: "push",
+          type: "send_recipts",
+          data: {
+            to: message.from,
+            message_id: message.id,
+            command: "read",
+            time: new Date(),
+            event_id: null,
+          },
+          _id: pushedEventId(message.id),
+        });
+        await messageDB.findByIdAndUpdate(message.id, {
+          is_read_event_created: true,
+        });
+
+        new_messages.push({
+          ...message,
+          is_read_event_created: true,
+        });
+        isChangeHapped = true;
+      }
+      if (isChangeHapped) setMessages(new_messages);
+      ref.current.isReadProcessing = false;
+    } catch (err: any) {
+      console.log(err);
+      ref.current.isReadProcessing = false;
+    }
+  };
+
+  useEffect(() => {
+    try {
+      if (!messages?.length || ref.current.isReadProcessing) return;
+      console.log("marked as read");
+      markedAsRead();
+    } catch (err: any) {
+      console.log(err.message);
+    }
+  }, [messages]);
 
   const getMessages = async () => {
     try {
