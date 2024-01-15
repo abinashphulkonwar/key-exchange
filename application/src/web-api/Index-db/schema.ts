@@ -167,14 +167,14 @@ export class Schema<TSchema, TAttrs, TQuery> {
   async findByIdAndUpdate(id: IDBValidKey, data: TQuery) {
     const val = await this.findById(id);
     if (!val) return false;
-    return await this.connection.put(
-      this.name,
-      {
-        ...val,
-        ...data,
-      },
-      id
-    );
+    console.log(data, {
+      ...val,
+      ...data,
+    });
+    return await this.connection.put(this.name, {
+      ...val,
+      ...data,
+    });
   }
   protected checkQueryParams(value: any) {
     if (!value) return false;
