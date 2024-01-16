@@ -28,16 +28,24 @@ let worker_session_id = "";
 export const WSContext = createContext<{
   socket: Socket | null;
   setUpUser: (user: user) => void;
+  user: {
+    isLogin: boolean;
+    _id: string;
+  };
 }>({
   socket: null,
   setUpUser: (_: user) => {},
+  user: {
+    isLogin: false,
+    _id: "",
+  },
 });
 
 export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
   children,
 }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [user, setUser] = useState<user | null>({
+  const [user, setUser] = useState<user>({
     isLogin: false,
     _id: "",
   });
@@ -224,6 +232,11 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
           data: any;
         }) => {
           console.log(event.type, key_event.c_post_new_message);
+          console.log(event.type, event);
+          const isAlreadyProcessed = await processedEventsDB.findOne({
+            _id: event.event_id,
+          });
+          if (isAlreadyProcessed) return;
           const isExist = await eventsDB.findOne({
             _id: event.event_id,
           });
@@ -250,11 +263,9 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
       let iter = 1;
       // if (!socket) return;
       console.log("queue started");
-
       while (session == worker_session_id) {
         count++;
         const events = await eventsDB.pull_events();
-
         if (!events || !events.length) {
           await sleep(500 * iter);
           if (iter == 10) {
@@ -266,8 +277,19 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
         }
 
         for (const event of events) {
+          const isExist = await processedEventsDB.findOne({
+            event_id: event.id,
+          });
+          if (isExist) {
+            await eventsDB.remove_event_by_id(event.id);
+            continue;
+          }
           const status = await useEvent.handler(event);
-          if (!status) continue;
+          //await sleep(400);
+          if (!status) {
+            await eventsDB.findByIdAndUpdate(event.id, event);
+            continue;
+          }
         }
         console.log("events need to be process: ", events, count);
         await sleep(20);
@@ -295,7 +317,9 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
   };
 
   return (
-    <WSContext.Provider value={{ socket: socket, setUpUser: setUpUser }}>
+    <WSContext.Provider
+      value={{ socket: socket, setUpUser: setUpUser, user: user }}
+    >
       {children}
     </WSContext.Provider>
   );

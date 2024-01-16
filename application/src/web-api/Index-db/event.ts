@@ -39,13 +39,14 @@ type push_event_id = `not-processed:${string}`;
 export const pushedEventId = (id: IDBValidKey): push_event_id =>
   `not-processed:${id}`;
 
-type event_state = "pending" | "done" | "error" | "push";
+type event_state = "pending" | "done" | "error";
 export interface interfaceEventsDB {
   id: IDBValidKey;
   _id: string;
   type: event_types;
   data: message_event | message_recipts_event | any;
   state: event_state;
+  last_process_time: Date;
 }
 
 type docdbQuery = {
@@ -59,6 +60,7 @@ type Attars = {
   _id: string;
   data: message_event | message_recipts_event | any;
   state?: event_state;
+  last_process_time?: Date;
 };
 
 export class eventsDB {
@@ -115,6 +117,7 @@ export class eventsDB {
     }
     return eventsDB.ref.find(query);
   }
+
   static findOne(query: docdbQuery) {
     if (!eventsDB.ref) {
       throw new Error("eventsDB not initialized");
@@ -137,7 +140,15 @@ export class eventsDB {
     const doc = await eventsDB.find({
       state: "pending",
     });
-    return doc;
+
+    return doc?.filter((val) => {
+      if (!val.last_process_time) return true;
+      const last_process_time = new Date(val.last_process_time);
+      const now = new Date();
+      const diff = now.getTime() - last_process_time.getTime();
+      if (diff >= 1000 * 60) return true;
+      return false;
+    });
   }
 
   static async remove_event_by_id(id: IDBValidKey) {
@@ -145,5 +156,15 @@ export class eventsDB {
     return await eventsDB.ref?.remove({
       id: id,
     });
+  }
+
+  static async findAndUpdate(query: docdbQuery[], update: docdbQuery[]) {
+    eventsDB.init_error();
+    return await eventsDB.ref?.findAndUpdate(query, update);
+  }
+  static async findByIdAndUpdate(key: IDBValidKey, data: interfaceEventsDB) {
+    eventsDB.init_error();
+    data.last_process_time = new Date();
+    return await eventsDB.ref?.findByIdAndUpdate(key, data);
   }
 }

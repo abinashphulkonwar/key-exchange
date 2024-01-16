@@ -114,8 +114,9 @@ export const useChats: useChats = ({
           continue;
         }
         console.log(pushedEventId(message.id));
+        if (message.from == ref.current.sender__id) continue;
         await eventsDB.save({
-          state: "push",
+          state: "pending",
           type: "send_recipts",
           data: {
             to: message.from,

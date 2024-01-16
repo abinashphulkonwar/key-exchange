@@ -10,4 +10,5 @@ export const key_event = {
   c_message_delivered_recipts: "c_message_delivered_recipts",
   s_post_message_recipts: "s-post-message-recipts",
   c_post_message_recipts: "c-post-message-recipts",
+  s_create_event: "s-create-event",
 };

@@ -8,7 +8,7 @@ import { eventsDB } from "./event";
 import { processedEventsDB } from "./processed-events";
 
 const database_name = "key-exchanger";
-const database_version = 23;
+const database_version = 24;
 
 export class ApplicationDb {
   private static connection: IDBPDatabase<unknown> | null = null;
@@ -42,18 +42,18 @@ export class ApplicationDb {
     database: IDBPDatabase<unknown>,
     transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
   ) {
-    await eventsDB.init(database, ApplicationDb.isVersionChange, transaction);
-    await processedEventsDB.init(
-      database,
-      ApplicationDb.isVersionChange,
-      transaction
-    );
     await KeyDB.init(database, ApplicationDb.isVersionChange, transaction);
 
     await messageDB.init(database, ApplicationDb.isVersionChange, transaction);
     await userDB.init(database, ApplicationDb.isVersionChange, transaction);
 
     await chatSessionDB.init(
+      database,
+      ApplicationDb.isVersionChange,
+      transaction
+    );
+    await eventsDB.init(database, ApplicationDb.isVersionChange, transaction);
+    await processedEventsDB.init(
       database,
       ApplicationDb.isVersionChange,
       transaction

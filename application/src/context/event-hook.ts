@@ -11,6 +11,7 @@ import { userDB } from "../web-api/Index-db/user";
 import { ApplicationCrypto } from "../web-api/web-crypto";
 import { key_event } from "./events-type";
 import { dispatch_event } from "./message-event";
+import { processedEventsDB } from "../web-api/Index-db/processed-events";
 
 export const UseEvent = ({ socket }: { socket: Socket | null }) => {
   const pull_message_handler = async (event: interfaceEventsDB) => {
@@ -68,6 +69,7 @@ export const UseEvent = ({ socket }: { socket: Socket | null }) => {
     const data = event.data as message_recipts_event;
 
     if (data.command == "ack") {
+      console.log(data.command);
       await eventsDB.remove_event_by_id(data.event_id);
     }
 
@@ -87,6 +89,12 @@ export const UseEvent = ({ socket }: { socket: Socket | null }) => {
 
     socket?.emit(key_event.server_ack, { _id: event._id });
     await eventsDB.remove_event_by_id(event.id);
+    await processedEventsDB.save({
+      _id: event._id,
+      created_at: new Date(),
+      state: "success",
+      event_id: event.id,
+    });
     return true;
   };
 

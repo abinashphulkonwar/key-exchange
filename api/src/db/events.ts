@@ -14,7 +14,7 @@ type message_type =
   | "poll"
   | "url";
 
-type event_types =
+export type event_types_interface =
   | "key"
   | "init_chat"
   | "init_chat_inform_about_private_key"
@@ -42,9 +42,9 @@ interface Recipts {
   event_id: number;
 }
 
-interface Attrs {
+export interface Attrs {
   userId: mongoose.Schema.Types.ObjectId | string;
-  type: event_types;
+  type: event_types_interface;
   key?: {
     device_key_id: number;
     other_user: mongoose.Schema.Types.ObjectId | string;
@@ -55,9 +55,11 @@ interface Attrs {
   };
   message?: message;
   recipts?: Recipts;
+  data: message | Recipts | any;
 
   state: "worker" | "emiter";
   worker_process_count: number;
+  device_event_id?: number;
 }
 
 interface Doc extends mongoose.Document {
@@ -66,7 +68,7 @@ interface Doc extends mongoose.Document {
   userId: mongoose.Schema.Types.ObjectId | string;
   createdAt: Date;
   updatedAt: Date;
-  type: event_types;
+  type: event_types_interface;
   key: {
     device_key_id: number;
     other_user: mongoose.Schema.Types.ObjectId | string;
@@ -77,9 +79,11 @@ interface Doc extends mongoose.Document {
   };
   message: message;
   recipts: Recipts;
+  data: message | Recipts;
   last_process_time: Date;
   state: "worker" | "emiter";
   worker_process_count: number;
+  device_event_id?: number;
 }
 interface Module extends mongoose.Model<Doc> {
   build(attrs: Attrs): Doc;
@@ -172,6 +176,10 @@ const DocSchema = new Schema(
       enum: ["worker", "emiter"],
       default: "worker",
     },
+    data: {
+      type: Object,
+    },
+    device_event_id: Number,
   },
   {
     timestamps: true,

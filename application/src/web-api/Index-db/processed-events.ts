@@ -9,16 +9,19 @@ export interface interfaceProcessedEventsDB {
   _id: string;
   created_at: Date;
   state: processed_event_state;
+  event_id: IDBValidKey;
 }
 
 type docdbQuery = {
   _id?: string;
   id?: IDBValidKey;
+  event_id?: IDBValidKey;
 };
 type Attars = {
   _id: string;
   created_at: Date;
   state: processed_event_state;
+  event_id?: IDBValidKey;
 };
 
 export class processedEventsDB {
@@ -56,6 +59,13 @@ export class processedEventsDB {
             field: "state",
             options: {
               unique: false,
+            },
+            command: "create",
+          },
+          {
+            field: "event_id",
+            options: {
+              unique: true,
             },
             command: "create",
           },

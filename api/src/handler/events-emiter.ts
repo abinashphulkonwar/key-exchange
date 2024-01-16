@@ -1,5 +1,5 @@
 import { Socket } from "socket.io";
-import { Events } from "../db/events";
+import { Events, event_types_interface } from "../db/events";
 import { event_types, key_event } from "./events-type";
 import { ConnectionsTree } from "./connections";
 
@@ -27,6 +27,7 @@ const emite_event = async (socket: Socket) => {
       event_id: event._id,
       init_chat: event.init_chat,
       data: event.message,
+      device_event_id: event.device_event_id,
     });
   } catch (err: any) {
     console.log(err.message);
@@ -40,6 +41,26 @@ export const events_emiter = async (socket: Socket) => {
     //await sleep();
     await emite_event(socket);
   });
+
+  socket.on(
+    event_types.s_create_event,
+    async (data: {
+      type: event_types_interface;
+      data: any;
+      to: string;
+      device_event_id: number;
+    }) => {
+      const event = Events.build({
+        type: data.type,
+        userId: data.to,
+        data: data.data,
+        state: "emiter",
+        worker_process_count: 0,
+        device_event_id: data.device_event_id,
+      });
+      await event.save();
+    }
+  );
 
   await emite_event(socket);
 };
