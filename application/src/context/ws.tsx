@@ -75,7 +75,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
           user_id: string;
           event_id: string;
         }) => {
-          console.log("c-get-key-event: ", data);
           const other_user = await userDB.findOne({ _id: data.user_id });
           let chat = await chatSessionDB.findOne({
             reciver_id: other_user?.id,
@@ -120,7 +119,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
           };
           data: any;
         }) => {
-          console.log(event.type, event);
           const isAlreadyProcessed = await processedEventsDB.findOne({
             _id: event.event_id,
           });
@@ -162,7 +160,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
             const other_user = await userDB.findOne({
               _id: event.key.other_user,
             });
-            console.log(other_user, event.key);
             const key = await KeyDB.findOne({
               id: event.key.device_key_id,
             });
@@ -170,7 +167,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
             const chat_session = await chatSessionDB.findOne({
               reciver_id: other_user?.id,
             });
-            console.log(chat_session);
             if (!chat_session) return;
             const shared_key = await KeyPair.deriveKey(
               key.private_key,
@@ -231,8 +227,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
           };
           data: any;
         }) => {
-          console.log(event.type, key_event.c_post_new_message);
-          console.log(event.type, event);
           const isAlreadyProcessed = await processedEventsDB.findOne({
             _id: event.event_id,
           });
@@ -262,7 +256,6 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
       let count = 0;
       let iter = 1;
       // if (!socket) return;
-      console.log("queue started");
       while (session == worker_session_id) {
         count++;
         const events = await eventsDB.pull_events();
@@ -277,21 +270,26 @@ export const WSContextProvider: React.FC<{ children: ReactElement }> = ({
         }
 
         for (const event of events) {
-          const isExist = await processedEventsDB.findOne({
+          const isAlreadyProcessed = await processedEventsDB.findOne({
             event_id: event.id,
           });
-          if (isExist) {
+          if (isAlreadyProcessed) {
             await eventsDB.remove_event_by_id(event.id);
             continue;
           }
           const status = await useEvent.handler(event);
-          //await sleep(400);
+          await sleep(400);
           if (!status) {
             await eventsDB.findByIdAndUpdate(event.id, event);
             continue;
+          } else {
+            const current_event = await eventsDB.findOne({
+              id: event.id,
+            });
+            if (current_event)
+              await eventsDB.findByIdAndUpdate(event.id, event);
           }
         }
-        console.log("events need to be process: ", events, count);
         await sleep(20);
         iter = 1;
       }
