@@ -5,10 +5,8 @@ import { useChats } from "../../hooks/useChat";
 import { getCurrentUser } from "../../web-api/user";
 import { UseSendMessage } from "../../hooks/useSendMessage";
 
-export const Loader = async ({ request }: { request: Request }) => {
+export const Loader = async ({}: { request: Request }) => {
   try {
-    console.log("Loader: ", request.url);
-
     const user = await getCurrentUser();
     return user;
   } catch (err) {
@@ -65,7 +63,6 @@ export const Index = () => {
 
   useEffect(() => {
     try {
-      console.log("rerender: ", state.user.email);
       init();
     } catch (err: any) {
       console.log(err.message);

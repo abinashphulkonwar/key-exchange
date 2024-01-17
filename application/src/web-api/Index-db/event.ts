@@ -76,7 +76,6 @@ export class eventsDB {
       console.log("eventsDB already initialized");
       return;
     }
-    console.log("init events db");
     eventsDB.ref = new Schema(
       {
         connection: connection,
@@ -146,7 +145,7 @@ export class eventsDB {
       const last_process_time = new Date(val.last_process_time);
       const now = new Date();
       const diff = now.getTime() - last_process_time.getTime();
-      if (diff >= 1000 * 60) return true;
+      if (diff >= 1000 * 60 * 2) return true;
       return false;
     });
   }

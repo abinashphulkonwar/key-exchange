@@ -7,11 +7,8 @@ import { WSContext } from "../context/ws";
 
 export const Loader = async ({}: { request: Request }) => {
   try {
-    console.log("Loader");
-
     const user = await getCurrentUser();
 
-    console.log(user);
     const users_list = await getUsersList();
 
     return {

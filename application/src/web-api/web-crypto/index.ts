@@ -47,8 +47,8 @@ export class ApplicationCrypto {
     });
 
     if (!request.ok) {
-      const res = await request.json();
-      console.log(res);
+      // const res = await request.json();
+      // console.log(res);
       return;
     }
     const keys_updated_query = keys.map((val) => {

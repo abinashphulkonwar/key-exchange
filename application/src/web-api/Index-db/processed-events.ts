@@ -40,7 +40,6 @@ export class processedEventsDB {
       console.log("processedEventsDB already initialized");
       return;
     }
-    console.log("init processedEventsDB db");
     processedEventsDB.ref = new Schema(
       {
         connection: connection,

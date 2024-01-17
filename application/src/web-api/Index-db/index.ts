@@ -14,15 +14,12 @@ export class ApplicationDb {
   private static connection: IDBPDatabase<unknown> | null = null;
   private static isVersionChange: boolean;
   private static async open() {
-    console.log("Opening database");
-
     openDB(database_name, database_version, {
       async upgrade(database, _, __, transaction) {
         ApplicationDb.isVersionChange = true;
         ApplicationDb.db_init(database, transaction);
       },
     }).then((connection) => {
-      console.log("Database opened");
       ApplicationDb.connection = connection;
       if (ApplicationDb.isVersionChange) return;
 

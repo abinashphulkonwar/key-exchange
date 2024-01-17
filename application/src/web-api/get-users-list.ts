@@ -6,6 +6,5 @@ export const getUsersList = async () => {
     },
   });
   const data = await req.json();
-  console.log(data);
   return data;
 };

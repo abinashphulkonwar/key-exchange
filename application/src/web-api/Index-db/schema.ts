@@ -22,7 +22,6 @@ export class Schema<TSchema, TAttrs, TQuery> {
     isVersionChange: boolean,
     transaction: IDBPTransaction<unknown, string[], "versionchange"> | null
   ) {
-    console.log("init db", db.name, isVersionChange);
     this.verifyDB(db);
     this.connection = db.connection;
 
@@ -32,8 +31,6 @@ export class Schema<TSchema, TAttrs, TQuery> {
       | IDBPObjectStore<unknown, ArrayLike<string>, string, "versionchange">
       | undefined = undefined;
     if (!this.connection.objectStoreNames.contains(db.name)) {
-      console.log("creating key store");
-
       store_ref = this.connection.createObjectStore(db.name, {
         keyPath: db.indexKey,
         autoIncrement: db.isAutoincrement,
@@ -61,7 +58,6 @@ export class Schema<TSchema, TAttrs, TQuery> {
             unique: index.options?.unique || false,
             multiEntry: index.options?.multiEntry || false,
           });
-          console.log("index created", index);
         }
       });
     }
@@ -156,21 +152,13 @@ export class Schema<TSchema, TAttrs, TQuery> {
     }
     transaction_events.push(transaction.done);
     await Promise.all(transaction_events);
-    console.log(
-      "transection done on store: ",
-      this.name,
-      "item updated: ",
-      data.length
-    );
+
     return true;
   }
   async findByIdAndUpdate(id: IDBValidKey, data: TQuery) {
     const val = await this.findById(id);
     if (!val) return false;
-    console.log(data, {
-      ...val,
-      ...data,
-    });
+
     return await this.connection.put(this.name, {
       ...val,
       ...data,
@@ -216,7 +204,6 @@ export class Schema<TSchema, TAttrs, TQuery> {
       if (!id) continue;
       this.connection.delete(this.name, id);
       this.connection.get;
-      console.log("item deleted");
       return true;
     }
 
