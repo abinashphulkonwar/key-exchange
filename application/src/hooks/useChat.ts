@@ -109,12 +109,19 @@ export const useChats: useChats = ({
       let isChangeHapped = false;
       const new_messages: messageDBdb[] = [];
       for (const message of messages) {
-        if (message.is_read_event_created || message.is_read) {
+        const isEventAlreadyCreated = await eventsDB.findOne({
+          _id: pushedEventId(message.id),
+        });
+        if (
+          message.is_read_event_created ||
+          message.is_read ||
+          message.from == ref.current.sender__id ||
+          isEventAlreadyCreated != undefined
+        ) {
           new_messages.push(message);
           continue;
         }
-        console.log(pushedEventId(message.id));
-        if (message.from == ref.current.sender__id) continue;
+
         await eventsDB.save({
           state: "pending",
           type: "send_recipts",
@@ -160,7 +167,6 @@ export const useChats: useChats = ({
       const messages_list = await messageDB.find({
         session_id: ref.current.session_id,
       });
-      console.log("messages: ", messages_list);
       setMessages(messages_list);
     } catch (err: any) {
       console.log(err.message);
