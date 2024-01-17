@@ -135,11 +135,16 @@ export class messageDB {
     return messageDB.ref.findOne(query);
   }
 
-  static findOneUpdate(id: IDBValidKey, data: docdbQuery) {
-    if (!messageDB.ref) {
-      throw new Error("chatSessionDB not initialized");
+  static async findOneUpdate(id: IDBValidKey, data: docdbQuery) {
+    try {
+      if (!messageDB.ref) {
+        throw new Error("chatSessionDB not initialized");
+      }
+      return await messageDB.ref.findByIdAndUpdate(id, data);
+    } catch (err: any) {
+      console.log(err);
+      return false;
     }
-    return messageDB.ref.findByIdAndUpdate(id, data);
   }
   static findAndUpdate(query: docdbQuery[], data: docdbQuery[]) {
     if (!messageDB.ref) {

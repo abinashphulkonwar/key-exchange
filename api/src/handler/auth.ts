@@ -26,7 +26,6 @@ export const isAuthenticated = async (
       session_obj?.id || "",
       KeyPasto
     )) as UserPayload;
-
     const user = await User.findById(payload._id);
 
     socket.user = payload;

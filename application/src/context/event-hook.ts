@@ -81,10 +81,12 @@ export const UseEvent = ({ socket }: { socket: Socket | null }) => {
     }
 
     if (data.command == "read") {
-      await messageDB.findOneUpdate(data.message_id, {
+      console.log("update event");
+      const res = await messageDB.findOneUpdate(data.message_id, {
         read_time: data.time,
         is_read: true,
       });
+      console.log(res);
     }
 
     socket?.emit(key_event.server_ack, { _id: event._id });

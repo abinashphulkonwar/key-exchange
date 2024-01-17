@@ -18,7 +18,6 @@ const emite_event = async (socket: Socket) => {
       state: "emiter",
     });
     if (!event) return;
-    console.log("event emited: ", event?._id, socket.id, event);
 
     socket.emit(key_event.client, {
       type: event.type,
@@ -87,7 +86,6 @@ export const events_emiter_worker = async () => {
         iter++;
         continue;
       }
-      console.log("event: ", event, last_process_time);
       last_process_time = new Date();
       last_process_time.setSeconds(last_process_time.getSeconds() + 25);
 
@@ -109,7 +107,6 @@ export const events_emiter_worker = async () => {
       }
       const socket = ConnectionsTree.get(event.userId.toString());
       socket.forEach((val) => {
-        console.log("emit: ", event_types.c_post_new_message);
         val.emit(event_types.c_post_new_message, {
           type: event.type,
           key: event.key,
