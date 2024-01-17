@@ -31,6 +31,7 @@ export const messages_handler = (socket: Socket) => {
         event_id: number;
       }) => {
         try {
+          if (!data.to) return;
           if (data.to == socket.user._id) return;
 
           const recipt_to_currect_user: Attrs["recipts"] = {

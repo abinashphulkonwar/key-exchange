@@ -18,7 +18,7 @@ const emite_event = async (socket: Socket) => {
       state: "emiter",
     });
     if (!event) return;
-    console.log("event emited: ", event?._id, socket.id);
+    console.log("event emited: ", event?._id, socket.id, event);
 
     socket.emit(key_event.client, {
       type: event.type,
@@ -26,7 +26,7 @@ const emite_event = async (socket: Socket) => {
       _id: event._id,
       event_id: event._id,
       init_chat: event.init_chat,
-      data: event.message,
+      data: event.data || event.message,
       device_event_id: event.device_event_id,
     });
   } catch (err: any) {
@@ -116,7 +116,8 @@ export const events_emiter_worker = async () => {
           _id: event._id,
           event_id: event._id,
           init_chat: event.init_chat,
-          data: event.message,
+          data: event.data || event.message,
+          device_event_id: event.device_event_id,
         });
       });
       await Events.findByIdAndUpdate(event._id, query);
