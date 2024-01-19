@@ -155,6 +155,26 @@ export class Schema<TSchema, TAttrs, TQuery> {
 
     return true;
   }
+  async findOneAndUpdate(query: TQuery, data: TQuery) {
+    if (!query || !data) {
+      return false;
+    }
+
+    for (const key in query) {
+      const keyValue = query[key] as IDBValidKey;
+      const isQueryParam = this.checkQueryParams(keyValue);
+      if (!isQueryParam) continue;
+      const record_id = await this.connection.getKeyFromIndex(
+        this.name,
+        key,
+        keyValue
+      );
+      if (record_id) {
+        return await this.findByIdAndUpdate(record_id, data);
+      }
+    }
+    return null;
+  }
   async findByIdAndUpdate(id: IDBValidKey, data: TQuery) {
     const val = await this.findById(id);
     console.log("val: ", val, id);

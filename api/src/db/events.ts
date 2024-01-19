@@ -153,7 +153,7 @@ const DocSchema = new Schema(
     recipts: {
       from: mongoose.Schema.Types.ObjectId,
       to: mongoose.Schema.Types.ObjectId,
-      message_id: Number,
+      message_id: String,
       command: {
         type: String,
         enum: ["read", "deliverd", "ack"],

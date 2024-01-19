@@ -49,6 +49,7 @@ type docdbQuery = {
   is_sent?: boolean;
   is_deliverd?: boolean;
   deliverd_time?: Date;
+  message_id?: string;
 };
 export type messageDBAttars = {
   session_id: IDBValidKey;
@@ -135,7 +136,7 @@ export class messageDB {
     return messageDB.ref.findOne(query);
   }
 
-  static async findOneUpdate(id: IDBValidKey, data: docdbQuery) {
+  static async findByIdUpdate(id: IDBValidKey, data: docdbQuery) {
     try {
       if (!messageDB.ref) {
         throw new Error("chatSessionDB not initialized");
@@ -145,6 +146,12 @@ export class messageDB {
       console.log(err);
       return false;
     }
+  }
+  static findOneUpdate(query: docdbQuery, data: docdbQuery) {
+    if (!messageDB.ref) {
+      throw new Error("messageDB not initialized");
+    }
+    return messageDB.ref.findOneAndUpdate(query, data);
   }
   static findAndUpdate(query: docdbQuery[], data: docdbQuery[]) {
     if (!messageDB.ref) {

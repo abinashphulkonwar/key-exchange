@@ -127,7 +127,7 @@ export const useChats: useChats = ({
           type: "send_recipts",
           data: {
             to: message.from,
-            message_id: message.id,
+            message_id: message.message_id,
             command: "read",
             time: new Date(),
             event_id: null,

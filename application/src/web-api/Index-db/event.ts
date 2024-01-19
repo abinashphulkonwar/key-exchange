@@ -9,7 +9,7 @@ export interface message_event {
   content: string;
   content_type: message_type;
   command: "add" | "delete";
-  message_id: IDBValidKey;
+  message_id: string;
   created_at: Date;
   iv: string;
 }

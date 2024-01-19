@@ -40,6 +40,7 @@ export const UseEvent = ({ socket }: { socket: Socket | null }) => {
         command: "add",
         created_at: message.created_at,
         iv: message.iv,
+        message_id: message.message_id,
       },
       true
     );
@@ -74,18 +75,28 @@ export const UseEvent = ({ socket }: { socket: Socket | null }) => {
     }
 
     if (data.command == "deliverd") {
-      await messageDB.findOneUpdate(data.message_id, {
-        deliverd_time: data.time,
-        is_deliverd: true,
-      });
+      await messageDB.findOneUpdate(
+        {
+          message_id: data.message_id,
+        },
+        {
+          deliverd_time: data.time,
+          is_deliverd: true,
+        }
+      );
     }
 
     if (data.command == "read") {
       console.log("update event");
-      const res = await messageDB.findOneUpdate(data.message_id, {
-        read_time: data.time,
-        is_read: true,
-      });
+      const res = await messageDB.findOneUpdate(
+        {
+          message_id: data.message_id,
+        },
+        {
+          read_time: data.time,
+          is_read: true,
+        }
+      );
       console.log(res);
     }
 
